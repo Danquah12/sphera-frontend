@@ -1,0 +1,23 @@
+﻿# Large binary files
+*.mp4
+*.webm
+avatar.png
+cover.png
+event.png
+group.png
+logo.png
+post1.png
+post2.png
+post3.png
+oreilly.png
+password_security.webp
+product.png
+spherareel-icon.png
+logo_defense.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Broken backups
+*.broken

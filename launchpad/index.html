@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sphera Launchpad — Mission Control</title>
+    <meta name="description" content="Launch and manage all Sphera ecosystem applications from one place.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #06070d;
+            --bg-surface: rgba(255,255,255,0.03);
+            --bg-card: rgba(255,255,255,0.05);
+            --bg-card-hover: rgba(255,255,255,0.09);
+            --glass-border: rgba(255,255,255,0.08);
+            --glass-border-hover: rgba(255,255,255,0.16);
+            --text-primary: #f0f2f5;
+            --text-secondary: #8b92a5;
+            --text-tertiary: #565d73;
+            --accent-blue: #4f8cff;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-green: #34d399;
+            --accent-orange: #fb923c;
+            --accent-rose: #f43f5e;
+            --accent-yellow: #facc15;
+            --glow-blue: rgba(79,140,255,0.15);
+            --glow-purple: rgba(168,85,247,0.15);
+            --radius: 16px;
+            --radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html { font-size: 15px; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── Animated Background ─── */
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            overflow: hidden;
+        }
+        .bg-mesh .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.35;
+            animation: orbFloat 20s ease-in-out infinite alternate;
+        }
+        .bg-mesh .orb:nth-child(1) {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, #4f8cff 0%, transparent 70%);
+            top: -10%; left: -5%;
+            animation-duration: 25s;
+        }
+        .bg-mesh .orb:nth-child(2) {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, #a855f7 0%, transparent 70%);
+            top: 50%; right: -10%;
+            animation-duration: 30s; animation-delay: -5s;
+        }
+        .bg-mesh .orb:nth-child(3) {
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, #22d3ee 0%, transparent 70%);
+            bottom: -10%; left: 30%;
+            animation-duration: 22s; animation-delay: -10s;
+        }
+        .bg-mesh .orb:nth-child(4) {
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, #f43f5e 0%, transparent 70%);
+            top: 20%; left: 60%;
+            animation-duration: 28s; animation-delay: -3s;
+            opacity: 0.2;
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+            100% { transform: translate(10px, -10px) scale(1.02); }
+        }
+
+        /* ─── Grid noise overlay ─── */
+        .bg-mesh::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ─── Main Layout ─── */
+        .launchpad {
+            position: relative; z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        /* ─── Header ─── */
+        .lp-header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeUp 0.8s ease-out both;
+        }
+        .lp-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .lp-logo-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 32px rgba(79,140,255,0.3);
+        }
+        .lp-logo-icon svg { width: 28px; height: 28px; fill: white; }
+        .lp-logo h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .lp-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+        .lp-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+        }
+
+        /* ─── Search Bar ─── */
+        .lp-search {
+            max-width: 480px;
+            margin: 0 auto 20px;
+            position: relative;
+            animation: fadeUp 0.8s ease-out 0.15s both;
+        }
+        .lp-search input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+            backdrop-filter: blur(20px);
+        }
+        .lp-search input::placeholder { color: var(--text-tertiary); }
+        .lp-search input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(79,140,255,0.15);
+        }
+        .lp-search-icon {
+            position: absolute;
+            left: 18px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+        }
+        .lp-search-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* ─── Category Filters ─── */
+        .lp-filters {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s ease-out 0.25s both;
+        }
+        .lp-filter-btn {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .lp-filter-btn:hover {
+            border-color: var(--glass-border-hover);
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+        .lp-filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 16px rgba(79,140,255,0.3);
+        }
+
+        /* ─── Cards Grid ─── */
+        .lp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        /* ─── App Card ─── */
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 28px;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.6s ease-out both;
+            text-decoration: none;
+            display: block;
+        }
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--card-accent, linear-gradient(90deg, var(--accent-blue), var(--accent-purple)));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .app-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--glass-border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px -12px rgba(0,0,0,0.5);
+        }
+        .app-card:hover::before { opacity: 1; }
+
+        .app-card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .app-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .app-icon svg {
+            width: 26px; height: 26px;
+            stroke: white; fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .app-icon .icon-filled { fill: white; stroke: none; }
+
+        .app-meta { flex: 1; min-width: 0; }
+        .app-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            letter-spacing: -0.3px;
+        }
+        .app-version {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+        }
+
+        .app-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 50px;
+        }
+        .app-status .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+        }
+        .status-ready { color: var(--accent-green); background: rgba(52,211,153,0.1); }
+        .status-ready .dot { background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+        .status-partial { color: var(--accent-yellow); background: rgba(250,204,21,0.1); }
+        .status-partial .dot { background: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
+        .status-offline { color: var(--text-tertiary); background: rgba(255,255,255,0.05); }
+        .status-offline .dot { background: var(--text-tertiary); }
+        .status-external { color: var(--accent-cyan); background: rgba(34,211,238,0.1); }
+        .status-external .dot { background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+
+        .app-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 16px;
+        }
+
+        .app-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .app-tag {
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-tertiary);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .app-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .app-port {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        .app-launch {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            transition: var(--transition);
+        }
+        .app-card:hover .app-launch {
+            color: #fff;
+            transform: translateX(4px);
+        }
+        .app-launch svg {
+            width: 16px; height: 16px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* ─── Section Label ─── */
+        .lp-section-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+            padding-left: 4px;
+        }
+
+        /* ─── Quick Stats Bar ─── */
+        .lp-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            animation: fadeUp 0.8s ease-out 0.35s both;
+        }
+        .lp-stat {
+            text-align: center;
+        }
+        .lp-stat-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .lp-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* ─── Hidden Card ─── */
+        .app-card.hidden {
+            display: none;
+        }
+
+        /* ─── Footer ─── */
+        .lp-footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+        }
+        .lp-footer a { color: var(--accent-blue); text-decoration: none; }
+
+        /* ─── Animations ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .app-card:nth-child(1) { animation-delay: 0.1s; }
+        .app-card:nth-child(2) { animation-delay: 0.18s; }
+        .app-card:nth-child(3) { animation-delay: 0.26s; }
+        .app-card:nth-child(4) { animation-delay: 0.34s; }
+        .app-card:nth-child(5) { animation-delay: 0.42s; }
+        .app-card:nth-child(6) { animation-delay: 0.50s; }
+        .app-card:nth-child(7) { animation-delay: 0.58s; }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .lp-grid { grid-template-columns: 1fr; }
+            .lp-stats { gap: 24px; flex-wrap: wrap; }
+            .launchpad { padding: 24px 16px 40px; }
+            .lp-logo h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-mesh">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    <div class="launchpad">
+        <!-- Header -->
+        <header class="lp-header">
+            <div class="lp-logo">
+                <div class="lp-logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <h1>Sphera Launchpad</h1>
+            </div>
+            <p class="lp-subtitle">Mission Control — All Systems</p>
+            <div class="lp-time" id="lp-clock"></div>
+        </header>
+
+        <!-- Quick Stats -->
+        <div class="lp-stats">
+            <div class="lp-stat">
+                <div class="lp-stat-val" id="stat-total">8</div>
+                <div class="lp-stat-label">Applications</div>
+            </div>
+            <div class="lp-stat">
+                <div class="lp-stat-val" id="stat-online">—</div>
+                <div class="lp-stat-label">Online</div>
+            </div>
+            <div class="lp-stat">
+                <div class="lp-stat-val">4</div>
+                <div class="lp-stat-label">Services</div>
+            </div>
+            <div class="lp-stat">
+                <div class="lp-stat-val">6</div>
+                <div class="lp-stat-label">Ports Used</div>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="lp-search">
+            <span class="lp-search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="text" id="lp-search-input" placeholder="Search applications..." autocomplete="off">
+        </div>
+
+        <!-- Filters -->
+        <div class="lp-filters">
+            <button class="lp-filter-btn active" data-filter="all">All Apps</button>
+            <button class="lp-filter-btn" data-filter="platform">Platforms</button>
+            <button class="lp-filter-btn" data-filter="commerce">Commerce</button>
+            <button class="lp-filter-btn" data-filter="security">Security</button>
+            <button class="lp-filter-btn" data-filter="career">Career Tools</button>
+            <button class="lp-filter-btn" data-filter="service">Services</button>
+            <button class="lp-filter-btn" data-filter="external">External</button>
+        </div>
+
+        <!-- App Grid -->
+        <div class="lp-grid" id="lp-grid"></div>
+
+        <!-- Footer -->
+        <div class="lp-footer">
+            <p>Sphera Ecosystem &copy; 2026 — <a href="https://expediteconsults.com" target="_blank">Expedite Consults</a></p>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // ── App Data ──
+        const APPS = [
+            {
+                id: 'sphera',
+                name: 'SPHERA',
+                version: 'v2.0.0',
+                desc: 'Social media & professional networking platform — feed, stories, reels, Nexus, CareerOrbit, SpheraMatch, Chat, Pay, Marketplace, Groups, Events, and 40+ career tools.',
+                url: 'http://127.0.0.1:3000',
+                port: ':3000',
+                category: 'platform',
+                tags: ['Social', 'Networking', 'PWA', 'FastAPI', 'PostgreSQL'],
+                status: 'ready',
+                statusText: 'Ready',
+                gradient: 'linear-gradient(135deg, #4f8cff, #a855f7)',
+                icon: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`
+            },
+            {
+                id: 'ats-platform',
+                name: 'Sphera ATS',
+                version: 'v1.0.0',
+                desc: 'Full Applicant Tracking System — dashboard analytics, job management, candidate pipeline, Kanban board, CareerSuite AI, LinkedIn Sync, and hiring workflow automation.',
+                url: 'http://127.0.0.1:8001',
+                port: ':8001',
+                category: 'career',
+                tags: ['ATS', 'Recruiting', 'AI', 'SQLAlchemy', 'JWT Auth'],
+                status: 'ready',
+                statusText: 'Online',
+                gradient: 'linear-gradient(135deg, #22d3ee, #4f8cff)',
+                icon: `<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`
+            },
+            {
+                id: 'ats-scanner',
+                name: 'ATS Scanner / CareerSuite',
+                version: 'v2.0.0',
+                desc: 'AI-powered resume scanner with instant ATS scoring, Gemini-driven document generation — tailored resumes, cover letters, interview prep, 90-day plans, and federal resume packages.',
+                url: 'http://127.0.0.1:8002',
+                port: ':8002',
+                category: 'career',
+                tags: ['Gemini AI', 'Resume', 'ATS', 'DOCX Gen', 'FastAPI'],
+                status: 'ready',
+                statusText: 'Online',
+                gradient: 'linear-gradient(135deg, #a855f7, #f43f5e)',
+                icon: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`
+            },
+            {
+                id: 'bazaar',
+                name: 'BAZAAR',
+                version: 'v2.0.0',
+                desc: 'AI-powered marketplace — B2B commerce with The Garage, TechVault, Threads & Fits, IceBox, eBay cross-listing, cart & checkout, delivery hub, admin dashboard, and seller tools.',
+                url: 'https://bazaar.expediteconsults.com/bazaar/#',
+                port: ':443 (prod)',
+                category: 'commerce',
+                tags: ['Marketplace', 'B2B', 'eBay', 'AI', 'E-Commerce'],
+                status: 'external',
+                statusText: 'Production',
+                gradient: 'linear-gradient(135deg, #f59e0b, #7c3aed)',
+                icon: `<svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`
+            },
+            {
+                id: 'bazaar-eats',
+                name: 'BAZAAR Eats',
+                version: 'v1.0.0',
+                desc: 'Food ordering & delivery platform — restaurant menus, real-time order tracking, delivery management, and cuisine discovery powered by the BAZAAR commerce engine.',
+                url: 'https://bazaar.expediteconsults.com/eats.html',
+                port: ':443 (prod)',
+                category: 'commerce',
+                tags: ['Food Delivery', 'Restaurants', 'Orders', 'Tracking'],
+                status: 'external',
+                statusText: 'Production',
+                gradient: 'linear-gradient(135deg, #f97316, #ef4444)',
+                icon: `<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`
+            },
+            {
+                id: 'skillhands',
+                name: 'SkillHands',
+                version: 'v1.0.0',
+                desc: 'Quick professional booking platform — find and book skilled professionals. Node.js Express backend running on production server with PM2 process management.',
+                url: 'https://skillhands.expediteconsults.com',
+                port: ':5000 (prod)',
+                category: 'external',
+                tags: ['Node.js', 'Express', 'PM2', 'Booking', 'Production'],
+                status: 'external',
+                statusText: 'Production',
+                gradient: 'linear-gradient(135deg, #fb923c, #facc15)',
+                icon: `<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`
+            },
+            {
+                id: 'aegis',
+                name: 'AEGIS SOC',
+                version: 'v3.3.0',
+                desc: 'Security Operations Center — vulnerability management, OSINT, threat intel, dark web monitoring, MITRE ATT&CK, red teaming, SAST, compliance/GRC, DFIR, phishing simulation, and 30+ security modules.',
+                url: 'https://vuln.expediteconsults.com/app/',
+                port: ':443 (prod)',
+                category: 'security',
+                tags: ['SOC', 'Cybersecurity', 'MITRE', 'OSINT', 'Python Dash', 'GRC'],
+                status: 'external',
+                statusText: 'Production',
+                gradient: 'linear-gradient(135deg, #ef4444, #f97316)',
+                icon: `<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`
+            },
+            {
+                id: 'reels-api',
+                name: 'Reels API',
+                version: 'v1.0.0',
+                desc: 'Video reel upload, storage, and retrieval microservice — powers SPHERA\'s short-form video content. Flask-based with file system persistence.',
+                url: 'http://127.0.0.1:5050',
+                port: ':5050',
+                category: 'service',
+                tags: ['Flask', 'Microservice', 'Video', 'REST API'],
+                status: 'offline',
+                statusText: 'Offline',
+                gradient: 'linear-gradient(135deg, #f43f5e, #a855f7)',
+                icon: `<svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`
+            },
+        ];
+
+        // ── Render Cards ──
+        function renderCards(filter = 'all', search = '') {
+            const grid = document.getElementById('lp-grid');
+            if (!grid) return;
+
+            const searchLower = search.toLowerCase();
+            const filtered = APPS.filter(app => {
+                const matchFilter = filter === 'all' || app.category === filter;
+                const matchSearch = !search ||
+                    app.name.toLowerCase().includes(searchLower) ||
+                    app.desc.toLowerCase().includes(searchLower) ||
+                    app.tags.some(t => t.toLowerCase().includes(searchLower));
+                return matchFilter && matchSearch;
+            });
+
+            grid.innerHTML = filtered.map((app, i) => `
+                <a class="app-card" href="${app.url}" target="_blank" rel="noopener" style="--card-accent: ${app.gradient}; animation-delay: ${0.1 + i * 0.08}s" data-id="${app.id}">
+                    <div class="app-card-top">
+                        <div class="app-icon" style="background: ${app.gradient};">
+                            ${app.icon}
+                        </div>
+                        <div class="app-meta">
+                            <div class="app-name">${app.name}</div>
+                            <div class="app-version">${app.version}</div>
+                            <span class="app-status status-${app.status}">
+                                <span class="dot"></span>
+                                ${app.statusText}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="app-desc">${app.desc}</div>
+                    <div class="app-tags">
+                        ${app.tags.map(t => `<span class="app-tag">${t}</span>`).join('')}
+                    </div>
+                    <div class="app-footer">
+                        <span class="app-port">${app.port}</span>
+                        <span class="app-launch">
+                            Launch
+                            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </span>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // ── Health Checks ──
+        async function checkHealth() {
+            let online = 0;
+            for (const app of APPS) {
+                if (app.category === 'external') {
+                    // Don't health-check external/production apps
+                    continue;
+                }
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 3000);
+                    const r = await fetch(app.url, { mode: 'no-cors', signal: controller.signal });
+                    clearTimeout(timeout);
+                    app.status = 'ready';
+                    app.statusText = 'Online';
+                    online++;
+                } catch {
+                    app.status = 'offline';
+                    app.statusText = 'Offline';
+                }
+            }
+            // Count external as online
+            online += APPS.filter(a => a.category === 'external').length;
+            document.getElementById('stat-online').textContent = online;
+            renderCards(currentFilter, currentSearch);
+        }
+
+        // ── Clock ──
+        function updateClock() {
+            const now = new Date();
+            const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const el = document.getElementById('lp-clock');
+            if (el) el.textContent = now.toLocaleDateString('en-US', opts);
+        }
+
+        // ── Filters ──
+        let currentFilter = 'all';
+        let currentSearch = '';
+
+        document.querySelectorAll('.lp-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lp-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderCards(currentFilter, currentSearch);
+            });
+        });
+
+        // ── Search ──
+        const searchInput = document.getElementById('lp-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                currentSearch = searchInput.value.trim();
+                renderCards(currentFilter, currentSearch);
+            });
+        }
+
+        // ── Init ──
+        renderCards();
+        updateClock();
+        setInterval(updateClock, 1000);
+        setTimeout(checkHealth, 500);
+        setInterval(checkHealth, 30000);
+
+    })();
+    </script>
+</body>
+</html>
