@@ -811,5 +811,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const copilotFab = document.querySelector('.copilot-fab, #copilotFab, [onclick*="toggleCopilot"]');
   if (copilotFab) copilotFab.addEventListener('click', toggleCopilot);
 
-  console.log('✅ SPHERA fully initialized');
+  // ── Deep-link support: ?tab=reels, ?tab=careerorbit, etc. ──
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam) {
+    // Small delay to let DOM settle
+    setTimeout(() => {
+      showPage(tabParam);
+      console.log('✦ Deep-linked to:', tabParam);
+    }, 300);
+  }
+
+  // Also listen for hash changes: #reels, #careerorbit, etc.
+  function handleHashNav() {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && VIEW_TO_PAGE[hash]) showPage(hash);
+  }
+  window.addEventListener('hashchange', handleHashNav);
+  if (window.location.hash) setTimeout(handleHashNav, 300);
+
+  console.log('✅ SPHERA fully initialized — deep-linking enabled');
 });
