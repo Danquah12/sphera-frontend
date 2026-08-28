@@ -73,6 +73,10 @@ function showPage(view) {
   const main = document.getElementById('mainContent');
   if (main) main.scrollTop = 0;
   // Run page-specific init
+  if (view === 'feed') initContentGrid();
+  if (view === 'careerorbit') initCareerorbitPage();
+  if (view === 'elevate') initElevatePage();
+  if (view === 'marketplace') initMarketplacePage();
   if (view === 'reels') initReelsPage();
   if (view === 'nexus') initNexusPage();
   if (view === 'messages') initMessagesPage();
@@ -82,8 +86,8 @@ function showPage(view) {
   if (view === 'groups') initGroupsPage();
   if (view === 'watch') initWatchPage();
   if (view === 'pulse') initPulsePage();
-  if (view === 'marketplace') initMarketplacePage();
-  if (view === 'elevate') initElevatePage();
+  if (view === 'profile') initProfilePage();
+  if (view === 'linkedup') initLinkedUpPage();
 }
 
 function setView(view) { showPage(view); }
@@ -626,82 +630,452 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function initElevatePage() { /* Elevate HTML */ }
+// ═══════════════════════════════════════════════════════════════
+// CAREERORBIT ENTERPRISE JOB BOARD & DETAIL VIEWER
+// ═══════════════════════════════════════════════════════════════
+const CO_JOBS = [
+  {
+    id: 'job-1',
+    title: 'Senior Information Systems Security Engineer (ISSE)',
+    company: 'Open Systems Technology (OST)',
+    location: 'Laurel, MD · Hybrid',
+    type: 'Full-time · Hybrid',
+    salary: '$175,000 - $215,000 / yr',
+    clearance: 'TS/SCI with Poly',
+    match: 98,
+    category: 'cyber',
+    color: '#7c3aed,#ec4899',
+    posted: '1d ago',
+    applicants: 14,
+    tags: ['ISSE', 'NIST 800-53', 'RMF', 'Zero Trust', 'Cloud Security'],
+    desc: 'Lead enterprise security engineering and authorization for federal multi-cloud environments. Implement Zero Trust Architecture (ZTA), design continuous monitoring pipelines, and ensure ATO compliance across high-impact federal defense systems.',
+    reqs: [
+      'Active TS/SCI clearance with Polygraph required',
+      '8+ years of dedicated ISSE or cybersecurity engineering experience',
+      'CISSP, CASP+, or CISM certification required',
+      'Hands-on expertise with AWS GovCloud and Azure Government architecture',
+      'Proven track record implementing NIST SP 800-53 Rev 5 & RMF life-cycle',
+      'Experience in automated compliance scanning (Tenable/Nessus, OpenSCAP, STIGs)'
+    ],
+    benefits: [
+      'Total Compensation: $175K-$215K Base + 15% Annual Bonus Target',
+      '401(k) Match: 100% match up to 6% of salary, immediate vesting',
+      'Clearance Retention Bonus: $15,000 annual polygraph stipend',
+      'Comprehensive Medical/Dental/Vision with 100% premium coverage'
+    ]
+  },
+  {
+    id: 'job-2',
+    title: 'Principal Cloud Security Architect (Zero Trust)',
+    company: 'CrowdStrike',
+    location: 'Remote · USA',
+    type: 'Full-time · Remote',
+    salary: '$195,000 - $240,000 / yr',
+    clearance: 'Public Trust / Clean Background',
+    match: 96,
+    category: 'cyber',
+    color: '#ef4444,#f59e0b',
+    posted: '2d ago',
+    applicants: 28,
+    tags: ['CloudSec', 'Zero Trust', 'Falcon Platform', 'Kubernetes', 'AWS'],
+    desc: 'Design and spearhead global cloud detection and response architecture across AWS, GCP, and Azure. Partner with engineering leaders to embed continuous identity verification, microsegmentation, and automated threat isolation.',
+    reqs: [
+      '10+ years architecture and security engineering experience',
+      'Expertise with Kubernetes security, container isolation, and service meshes (Istio)',
+      'Deep knowledge of identity federations (OIDC, SAML, Okta, Entra ID)',
+      'Proficiency in Go, Python, and Terraform infrastructure-as-code'
+    ],
+    benefits: [
+      'Base: $195K-$240K + RSU Equity Grant ($120K over 4 yrs)',
+      'Unlimited Paid Time Off (FTO) + Annual Wellness Stipend ($2,500)',
+      'Remote Office Setup Allowance ($3,000)'
+    ]
+  },
+  {
+    id: 'job-3',
+    title: 'Lead Cyber Threat Hunter & Incident Responder',
+    company: 'Mandiant / Google Cloud',
+    location: 'Washington, DC · Hybrid',
+    type: 'Full-time · Hybrid',
+    salary: '$180,000 - $225,000 / yr',
+    clearance: 'Top Secret Eligible',
+    match: 94,
+    category: 'cyber',
+    color: '#0ea5e9,#6d28d9',
+    posted: '3d ago',
+    applicants: 19,
+    tags: ['Threat Hunting', 'DFIR', 'MITRE ATT&CK', 'SIEM', 'YARA'],
+    desc: 'Investigate advanced nation-state threat actors (APTs), conduct proactive threat hunts across enterprise telemetry, and author deep threat intelligence advisories for Fortune 100 executives.',
+    reqs: [
+      '7+ years in digital forensics and incident response (DFIR)',
+      'Deep understanding of Windows/Linux internals and kernel telemetry',
+      'Experience authoring custom YARA rules and Sigma detection logic',
+      'SANS GIAC certifications (GCFA, GCFE, GNFA, or GREM) highly preferred'
+    ],
+    benefits: [
+      'Comprehensive Google equity & bonus program',
+      'World-class continuing education & SANS training budget ($10,000/yr)',
+      'On-site gourmet meals & wellness benefits'
+    ]
+  },
+  {
+    id: 'job-4',
+    title: 'Senior DevSecOps & Security Automation Engineer',
+    company: 'Lockheed Martin Space',
+    location: 'Bethesda, MD · Hybrid',
+    type: 'Full-time · Hybrid',
+    salary: '$160,000 - $198,000 / yr',
+    clearance: 'Secret / TS Eligible',
+    match: 92,
+    category: 'gov',
+    color: '#10b981,#0ea5e9',
+    posted: '4d ago',
+    applicants: 31,
+    tags: ['DevSecOps', 'CI/CD', 'GitLab', 'Terraform', 'Static Analysis'],
+    desc: 'Integrate automated SAST, DAST, and container vulnerability scanning directly into satellite ground station CI/CD pipelines. Eliminate security bottlenecks for mission-critical aerospace software.',
+    reqs: [
+      '6+ years in DevOps / DevSecOps engineering',
+      'Expertise in GitLab CI/CD, GitHub Actions, and ArgoCD',
+      'Experience hardening Linux/RHEL images to DISA STIG baselines',
+      'Secret clearance required; ability to obtain TS/SCI'
+    ],
+    benefits: [
+      '4x10 Flexible Work Schedule (Every Friday Off)',
+      'Exceptional defined retirement contribution (9% total company match)',
+      'Full tuition assistance for Master\'s degree programs'
+    ]
+  },
+  {
+    id: 'job-5',
+    title: 'Staff Offensive Security Consultant / Red Teamer',
+    company: 'Bishop Fox',
+    location: 'Remote · USA',
+    type: 'Full-time · Remote',
+    salary: '$170,000 - $210,000 / yr',
+    clearance: 'None / Private Sector',
+    match: 95,
+    category: 'tech',
+    color: '#f59e0b,#ef4444',
+    posted: '5d ago',
+    applicants: 22,
+    tags: ['Red Team', 'OSCP', 'Active Directory', 'C2', 'Penetration Testing'],
+    desc: 'Execute complex red team simulations against enterprise defenses. Emulate real-world adversary tactics, develop custom payloads, exploit Active Directory trust relationships, and deliver strategic executive briefings.',
+    reqs: [
+      'OSCP, OSEP, CRTO, or GPEN certification required',
+      '5+ years dedicated penetration testing / red teaming experience',
+      'Demonstrated experience bypassing EDR solutions and developing custom C2 implants',
+      'Outstanding technical report writing and executive communication skills'
+    ],
+    benefits: [
+      '100% remote work with flexible hours',
+      'Annual hardware & lab budget ($5,000/yr)',
+      'Comprehensive healthcare + 401k match'
+    ]
+  }
+];
 
-function initDiscoverGrid() {
-  const grid = document.getElementById('discoverGrid');
-  if (!grid || grid.children.length > 0) return;
-  const items = [
-    { title:'Cybersecurity', icon:'🛡', color:'#0ea5e9' },
-    { title:'AI & ML', icon:'🤖', color:'#7c3aed' },
-    { title:'Cloud Computing', icon:'☁️', color:'#10b981' },
-    { title:'DevOps', icon:'⚙️', color:'#f59e0b' },
-    { title:'Blockchain', icon:'🔗', color:'#ec4899' },
-    { title:'Data Science', icon:'📊', color:'#6d28d9' },
-  ];
-  grid.innerHTML = items.map(it => `
-    <div class="discover-card" style="border-color:${it.color}30" onclick="showToast('Exploring ${it.title}...')">
-      <div class="dc-icon">${it.icon}</div>
-      <div class="dc-title">${it.title}</div>
-    </div>
-  `).join('');
+let _activeJobId = 'job-1';
+
+function initCareerorbitPage() {
+  renderCoJobs('all');
+  selectCoJob(_activeJobId);
+
+  // Wire category filter tabs
+  document.querySelectorAll('#coSourceTabs .co-pill').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#coSourceTabs .co-pill').forEach(b => b.classList.remove('active-copill'));
+      btn.classList.add('active-copill');
+      const cat = btn.dataset.source || 'all';
+      renderCoJobs(cat);
+    };
+  });
+
+  // Wire Curated / Live tabs
+  const tabCurated = document.getElementById('tabCurated');
+  const tabLive = document.getElementById('tabLive');
+  if (tabCurated) tabCurated.onclick = () => {
+    tabCurated.classList.add('active-copill');
+    tabLive?.classList.remove('active-copill');
+    renderCoJobs('all');
+  };
+  if (tabLive) tabLive.onclick = () => {
+    tabLive?.classList.add('active-copill');
+    tabCurated?.classList.remove('active-copill');
+    renderCoJobs('all');
+  };
 }
 
-function initPeopleGrid() {
-  const grid = document.getElementById('peopleGrid');
-  if (!grid || grid.children.length > 0) return;
-  const people = [
-    { name:'Sarah Chen', title:'CISO at TechCorp', color:'#0ea5e9,#6d28d9' },
-    { name:'Marcus Johnson', title:'Penetration Tester', color:'#7c3aed,#ec4899' },
-    { name:'Priya Sharma', title:'Cloud Security Architect', color:'#10b981,#0ea5e9' },
-    { name:'David Kim', title:'SOC Analyst Lead', color:'#f59e0b,#ef4444' },
-  ];
-  grid.innerHTML = people.map(p => `
-    <div class="people-card">
-      <div class="pc-avatar" style="background:linear-gradient(135deg,${p.color})">${p.name[0]}</div>
-      <div class="pc-name">${p.name}</div>
-      <div class="pc-title">${p.title}</div>
-      <button class="pc-connect-btn" onclick="showToast('🤝 Connection request sent to ${p.name}!')">+ Connect</button>
-    </div>
-  `).join('');
+function renderCoJobs(category = 'all') {
+  const container = document.getElementById('coJobList');
+  if (!container) return;
+
+  const filtered = category === 'all' 
+    ? CO_JOBS 
+    : CO_JOBS.filter(j => j.category === category || j.tags.some(t => t.toLowerCase().includes(category)));
+
+  const displayList = filtered.length > 0 ? filtered : CO_JOBS;
+
+  container.innerHTML = displayList.map(j => {
+    const isActive = j.id === _activeJobId;
+    return `
+      <div class="co-job-card ${isActive ? 'co-active-job' : ''}" onclick="selectCoJob('${j.id}')">
+        <button class="cj-save-btn" onclick="event.stopPropagation(); showToast('⭐ Job saved to watchlist!')">☆</button>
+        <div class="cj-header">
+          <div class="cj-logo-fallback" style="background:linear-gradient(135deg,${j.color})">${j.company[0]}</div>
+          <div style="flex:1;min-width:0">
+            <div class="cj-title">${j.title}</div>
+            <div class="cj-company">${j.company}</div>
+            <div class="cj-location">📍 ${j.location}</div>
+          </div>
+        </div>
+        <div class="cj-tags">
+          <span class="cj-tag" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:#10b981">✦ ${j.match}% MATCH</span>
+          <span class="cj-tag tssci">🛡️ ${j.clearance}</span>
+          ${j.tags.slice(0, 3).map(t => `<span class="cj-tag">${t}</span>`).join('')}
+        </div>
+        <div class="cj-salary">${j.salary}</div>
+        <div class="cj-footer">
+          <span>${j.posted} · ${j.applicants} applicants</span>
+          <button class="cj-easy-apply" onclick="event.stopPropagation(); showToast('⚡ Quick apply initiated for ${j.company}!')">⚡ Orbit Apply</button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
-function initEventsGrid() {
-  const grid = document.getElementById('eventsGrid');
-  if (!grid || grid.children.length > 0) return;
-  grid.innerHTML = `
-    <div class="event-card" onclick="showToast('📅 Opening event details...')">
-      <div class="ec-date"><span class="ec-month">APR</span><span class="ec-day">15</span></div>
-      <div class="ec-info"><div class="ec-title">Cybersecurity Summit 2026</div><div class="ec-meta">🌐 Virtual · 2,400 attending</div></div>
-    </div>
-    <div class="event-card" onclick="showToast('📅 Opening event details...')">
-      <div class="ec-date"><span class="ec-month">MAY</span><span class="ec-day">3</span></div>
-      <div class="ec-info"><div class="ec-title">RSA Conference — Networking Mixer</div><div class="ec-meta">📍 San Francisco, CA · 850 attending</div></div>
+function selectCoJob(jobId) {
+  _activeJobId = jobId;
+  const job = CO_JOBS.find(j => j.id === jobId) || CO_JOBS[0];
+  const detail = document.getElementById('coJobDetail');
+  if (!detail) return;
+
+  // Highlight active card
+  document.querySelectorAll('.co-job-card').forEach(c => c.classList.remove('co-active-job'));
+  const activeEl = document.querySelector(`.co-job-card[onclick*="${jobId}"]`);
+  if (activeEl) activeEl.classList.add('co-active-job');
+
+  detail.innerHTML = `
+    <div class="cd-header" style="animation:fadeIn .25s ease">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">
+        <div class="cd-logo-lg-fb" style="background:linear-gradient(135deg,${job.color})">${job.company[0]}</div>
+        <span style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);color:#10b981;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:800">✦ ${job.match}% Profile Fit</span>
+      </div>
+      <h2 class="cd-title">${job.title}</h2>
+      <div class="cd-company">${job.company} · ${job.location}</div>
+      <div class="cd-meta-row">
+        <span class="cd-meta-item">🕒 ${job.type}</span>
+        <span class="cd-meta-item">🛡️ ${job.clearance}</span>
+        <span class="cd-meta-item">📅 Posted ${job.posted}</span>
+      </div>
+      <div class="cd-salary">${job.salary}</div>
+      
+      <div class="cd-actions">
+        <button class="cd-apply-btn easy" onclick="showToast('🚀 Application transmitted to ${job.company}!')">⚡ 1-Click Orbit Apply</button>
+        <button class="cd-save-btn" onclick="showToast('✂️ AI tailoring resume to ${job.title}...')">✂️ Tailor Resume</button>
+        <button class="cd-save-btn" onclick="showToast('🎤 Loading interview simulation questions for ${job.title}...')">🎤 Interview Prep</button>
+      </div>
+
+      <div class="cd-section">
+        <div class="cd-section-title">Role Overview</div>
+        <p class="cd-desc">${job.desc}</p>
+      </div>
+
+      <div class="cd-section">
+        <div class="cd-section-title">Requirements & Qualifications</div>
+        <ul class="cd-req-list">
+          ${job.reqs.map(r => `<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="cd-section">
+        <div class="cd-section-title">Compensation & Benefits Package</div>
+        <ul class="cd-req-list">
+          ${job.benefits.map(b => `<li>${b}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="cd-section">
+        <div class="cd-section-title">Orbit Network Connections</div>
+        <div class="cd-connections">
+          <div class="cd-conn-item">
+            <div class="cd-conn-avatar">Y</div>
+            <div><strong>Yaw Asiedu-Danquah</strong> works at an affiliated partner · <a href="#" onclick="showToast('Message sent asking for introduction');return false" style="color:#a78bfa;font-weight:700">Ask for Referral</a></div>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ELEVATE LEARNING HUB
+// ═══════════════════════════════════════════════════════════════
+function initElevatePage() {
+  const goalsContainer = document.getElementById('elGoals');
+  if (goalsContainer) {
+    goalsContainer.innerHTML = `
+      <div style="padding:10px 0">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#fff;margin-bottom:6px">
+          <span>Zero Trust Architecture</span><span>75%</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+          <div style="width:75%;height:100%;background:linear-gradient(90deg,#7c3aed,#0ea5e9)"></div>
+        </div>
+      </div>
+      <div style="padding:10px 0">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#fff;margin-bottom:6px">
+          <span>CISSP Exam Prep</span><span>90%</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+          <div style="width:90%;height:100%;background:linear-gradient(90deg,#10b981,#0ea5e9)"></div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONNECTIONS / NETWORK
+// ═══════════════════════════════════════════════════════════════
+function initPeopleGrid() {
+  const grid = document.getElementById('peopleGrid');
+  if (!grid || grid.children.length > 0) return;
+
+  const people = [
+    { name: 'Sarah Chen, CISSP', title: 'Chief Information Security Officer (CISO)', company: 'Federal Cloud Systems', mutual: 18, color: '#0ea5e9,#6d28d9' },
+    { name: 'Marcus Johnson, OSCP', title: 'Senior Penetration Tester & Red Team Lead', company: 'Bishop Fox', mutual: 24, color: '#7c3aed,#ec4899' },
+    { name: 'Priya Sharma', title: 'Principal Cloud Security Architect', company: 'CrowdStrike', mutual: 12, color: '#10b981,#0ea5e9' },
+    { name: 'David Kim', title: 'SOC Lead & Incident Responder', company: 'Mandiant / Google Cloud', mutual: 9, color: '#f59e0b,#ef4444' },
+    { name: 'Elena Rostova', title: 'Director of Cyber Defense & Threat Intel', company: 'Lockheed Martin', mutual: 31, color: '#ec4899,#7c3aed' },
+    { name: 'Tariq Al-Mansoor', title: 'Zero Trust Security Architect', company: 'Microsoft Defense', mutual: 15, color: '#059669,#10b981' }
+  ];
+
+  grid.innerHTML = people.map(p => `
+    <div class="people-card" style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative">
+      <div class="pc-avatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,${p.color});display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin-bottom:12px;box-shadow:0 0 16px rgba(124,58,237,0.3)">${p.name[0]}</div>
+      <div class="pc-name" style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">${p.name}</div>
+      <div class="pc-title" style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:6px">${p.title}</div>
+      <div style="font-size:11px;color:#a78bfa;margin-bottom:16px">💼 ${p.company} · ${p.mutual} mutual connections</div>
+      <div style="display:flex;gap:8px;width:100%">
+        <button class="pc-connect-btn" onclick="showToast('🤝 Connection request sent to ${p.name}!')" style="flex:1;background:linear-gradient(135deg,#7c3aed,#0ea5e9);border:none;color:#fff;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer">+ Connect</button>
+        <button onclick="showToast('💬 Opening direct chat with ${p.name}...')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 12px;border-radius:20px;font-size:12px;cursor:pointer">💬</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENTS HUB
+// ═══════════════════════════════════════════════════════════════
+function initEventsGrid() {
+  const grid = document.getElementById('eventsGrid');
+  if (!grid || grid.children.length > 0) return;
+
+  const events = [
+    { title: 'Global Zero Trust Summit 2026', date: 'APR 15', time: '1:00 PM EST', format: '🌐 Virtual Keynote', attendees: '2,400 attending', desc: 'Architecture patterns for continuous verification across multi-cloud defense ecosystems.' },
+    { title: 'RSA Conference — Cyber Executive Mixer', date: 'MAY 03', time: '6:30 PM PST', format: '📍 San Francisco, CA', attendees: '850 attending', desc: 'Private networking mixer with CISOs, threat hunters, and venture founders.' },
+    { title: 'Black Hat USA — Advanced Red Team Labs', date: 'AUG 12', time: '9:00 AM PST', format: '📍 Las Vegas, NV & Virtual', attendees: '4,100 attending', desc: 'Hands-on adversary emulation, active directory exploitation, and EDR evasion masterclass.' },
+    { title: 'AWS re:Inforce Cloud Security Briefing', date: 'JUN 22', time: '10:00 AM EST', format: '🌐 Virtual Masterclass', attendees: '1,900 attending', desc: 'Deep dive into automated compliance with AWS Security Hub, GuardDuty, and IAM Identity Center.' }
+  ];
+
+  grid.innerHTML = events.map(e => `
+    <div class="event-card" style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;display:flex;gap:16px;align-items:flex-start;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+      <div class="ec-date" style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);border-radius:12px;padding:10px 14px;text-align:center;color:#fff;flex-shrink:0">
+        <div style="font-size:11px;font-weight:700;opacity:0.8">${e.date.split(' ')[0]}</div>
+        <div style="font-size:20px;font-weight:900">${e.date.split(' ')[1]}</div>
+      </div>
+      <div class="ec-info" style="flex:1">
+        <div class="ec-title" style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">${e.title}</div>
+        <div class="ec-meta" style="font-size:12px;color:#a78bfa;margin-bottom:6px">${e.format} · ${e.time} · ${e.attendees}</div>
+        <p style="font-size:12.5px;color:rgba(255,255,255,0.7);line-height:1.5;margin-bottom:12px">${e.desc}</p>
+        <button onclick="event.stopPropagation(); showToast('🎟️ RSVP confirmed for ${e.title}!')" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);color:#10b981;border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;cursor:pointer">✓ RSVP Attending</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GROUPS / SPHERES
+// ═══════════════════════════════════════════════════════════════
 function initGroupsList() {
   const list = document.getElementById('gsMyList');
   if (!list || list.children.length > 0) return;
-  const groups = ['Cybersecurity Professionals','Cloud Architecture Forum','Federal IT Network'];
-  list.innerHTML = groups.map(g => `<div class="gs-item" onclick="showToast('Opening ${g}...')">${g}</div>`).join('');
+
+  const groups = [
+    { name: 'Cybersecurity Executives & CISOs', members: '14.2K members', tag: 'Executive' },
+    { name: 'Zero Trust & Cloud Defense Network', members: '9.8K members', tag: 'Architecture' },
+    { name: 'Federal IT Security & RMF Compliance', members: '7.4K members', tag: 'Gov / Defense' },
+    { name: 'Offensive Security & Red Team Labs', members: '18.1K members', tag: 'Offensive' }
+  ];
+
+  list.innerHTML = groups.map(g => `
+    <div class="gs-item" onclick="showToast('Opening ${g.name} community...')" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+      <div>
+        <div style="font-size:13.5px;font-weight:700;color:#fff">${g.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">🔮 ${g.members} · <span style="color:#a78bfa">${g.tag}</span></div>
+      </div>
+      <button onclick="event.stopPropagation(); showToast('✓ Joined ${g.name}')" style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:#c4b5fd;border-radius:16px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer">Joined</button>
+    </div>
+  `).join('');
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SPHEREVISION (WATCH)
+// ═══════════════════════════════════════════════════════════════
 function initWatchGrid() {
   const grid = document.getElementById('watchGrid');
   if (!grid || grid.children.length > 0) return;
-  grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text2)">🎥 Videos coming soon — check back later!</div>';
+
+  const videos = [
+    { title: 'Deconstructing Nation-State Cyber Attacks in 2026', author: 'CyberWatch Global', views: '42K views', duration: '28:45', color: '#7c3aed,#ec4899' },
+    { title: 'Zero Trust Architecture from Scratch: Live AWS Demo', author: 'CloudSec Pro', views: '89K views', duration: '45:10', color: '#0ea5e9,#6d28d9' },
+    { title: 'OSCP Exam Walkthrough & Buffer Overflow Tactics', author: 'Offensive Labs', views: '115K views', duration: '1:12:00', color: '#ef4444,#f59e0b' },
+    { title: 'AI-Powered Security Operations: Automated Threat Hunting', author: 'Google Security', views: '64K views', duration: '34:20', color: '#10b981,#0ea5e9' }
+  ];
+
+  grid.innerHTML = videos.map(v => `
+    <div class="watch-card" onclick="showToast('▶ Playing: ${v.title}')" style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+      <div style="height:160px;background:linear-gradient(135deg,${v.color});position:relative;display:flex;align-items:center;justify-content:center">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff">▶</div>
+        <span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.8);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">${v.duration}</span>
+      </div>
+      <div style="padding:14px">
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.4">${v.title}</div>
+        <div style="font-size:12px;color:#a78bfa;margin-bottom:2px">${v.author} ✦</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4)">${v.views} · 3 days ago</div>
+      </div>
+    </div>
+  `).join('');
 }
 
+// ═══════════════════════════════════════════════════════════════
+// LIVE PULSE
+// ═══════════════════════════════════════════════════════════════
 function initPulseStreams() {
   const streams = document.getElementById('pulseStreams');
   if (!streams || streams.children.length > 0) return;
-  streams.innerHTML = [
-    { topic:'#CyberSecurity', count:'12.4K', trend:'↑' },
-    { topic:'#ZeroTrust', count:'8.7K', trend:'↑' },
-    { topic:'#CloudSec', count:'5.2K', trend:'→' },
-  ].map(s => `<div class="pulse-stream-item"><span class="ps-topic">${s.topic}</span><span class="ps-count">${s.count} pulses ${s.trend}</span></div>`).join('');
+
+  const topics = [
+    { topic: '#CyberSecurity', count: '18.4K', trend: '↑ +34%', active: '340 Live' },
+    { topic: '#ZeroTrust', count: '12.1K', trend: '↑ +58%', active: '210 Live' },
+    { topic: '#CISSP', count: '9.3K', trend: '↑ +12%', active: '145 Live' },
+    { topic: '#CloudSec', count: '8.7K', trend: '→ +8%', active: '98 Live' },
+    { topic: '#CareerOrbit', count: '15.6K', trend: '↑ +85%', active: '420 Live' }
+  ];
+
+  streams.innerHTML = topics.map(s => `
+    <div class="pulse-stream-item" onclick="showToast('Joining stream ${s.topic}...')" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff">${s.topic}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5)">${s.count} total signals · <span style="color:#10b981;font-weight:700">${s.trend}</span></div>
+      </div>
+      <span style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px">🔴 ${s.active}</span>
+    </div>
+  `).join('');
+}
+
+function initLinkedUpPage() {
+  /* SpheraMatch initialized */
 }
 
 // ── Reels Video Upload ────────────────────────────────────────
