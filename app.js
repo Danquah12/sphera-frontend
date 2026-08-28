@@ -271,30 +271,198 @@ function initCategoryPills() {
 function initContentGrid() {
   const grid = document.getElementById('contentGrid');
   if (!grid || grid.children.length > 0) return;
+
   const mockPosts = [
-    { user:'Kwesi Asiedu', handle:'@kwesi', time:'2h', content:'Just passed my OSCP certification! 🎉 The 24-hour exam was intense but worth every minute.', likes:847, comments:124, color:'#7c3aed,#ec4899' },
-    { user:'Alex Rivera', handle:'@alexr', time:'4h', content:'New blog post: "Zero Trust Architecture in Practice" — 5 lessons from implementing ZTA at scale.', likes:392, comments:67, color:'#0ea5e9,#6d28d9' },
-    { user:'Jordan Chen', handle:'@jordanc', time:'6h', content:'Excited to announce I\'m joining CrowdStrike as a Senior Threat Intelligence Analyst! 🚀', likes:2103, comments:284, color:'#10b981,#0ea5e9' },
-    { user:'Maya Patel', handle:'@mayap', time:'8h', content:'The cybersecurity skills gap is real. We need to invest in training the next generation. Here\'s my take...', likes:651, comments:93, color:'#f59e0b,#ef4444' },
-    { user:'Riley Zhang', handle:'@rileyz', time:'12h', content:'Built a custom SIEM dashboard this weekend. Python + Elasticsearch + Grafana = 🔥', likes:528, comments:76, color:'#ec4899,#f97316' },
-    { user:'Sam Torres', handle:'@samt', time:'1d', content:'Attending RSA Conference next week! Who else will be there? Let\'s connect! 🤝', likes:193, comments:41, color:'#6d28d9,#0ea5e9' },
+    { 
+      user: 'Kwesi Asiedu', 
+      handle: '@kwesi', 
+      time: '2h ago', 
+      verified: true,
+      channel: 'Professional',
+      content: 'Just passed my <span class="hashtag">#OSCP</span> certification! 🎉 The 24-hour exam was intense but worth every minute. Big thanks to the SPHERA community for the resources and study groups.', 
+      likes: 847, 
+      comments: 124, 
+      shares: 48,
+      color: '#7c3aed,#ec4899' 
+    },
+    { 
+      user: 'Alex Rivera', 
+      handle: '@alexr', 
+      time: '4h ago', 
+      verified: true,
+      channel: 'Tech & Architecture',
+      content: 'New deep-dive breakdown: <strong>"Zero Trust Architecture in Practice"</strong> — 5 lessons learned from implementing ZTA across multi-cloud environments. <br/><br/>Key takeaway: Identity is the new perimeter. <span class="hashtag">#ZeroTrust</span> <span class="hashtag">#CloudSecurity</span> <span class="hashtag">#DevSecOps</span>', 
+      likes: 392, 
+      comments: 67, 
+      shares: 31,
+      color: '#0ea5e9,#6d28d9' 
+    },
+    { 
+      user: 'Jordan Chen', 
+      handle: '@jordanc', 
+      time: '6h ago', 
+      verified: true,
+      channel: 'Career Update',
+      content: 'Excited to announce I\'m joining CrowdStrike as a Senior Threat Intelligence Analyst! 🚀 Huge shoutout to the <span class="hashtag">#CareerOrbit</span> JD Match & Interview Forge tools for helping me prep.', 
+      likes: 2103, 
+      comments: 284, 
+      shares: 112,
+      color: '#10b981,#0ea5e9' 
+    },
+    { 
+      user: 'Maya Patel', 
+      handle: '@mayap', 
+      time: '8h ago', 
+      verified: false,
+      channel: 'Cybersecurity',
+      content: 'The global cybersecurity skills gap is real. We need to invest heavily in training the next generation of analysts and ethical hackers. What is your company doing to mentor junior talent? <span class="hashtag">#CyberSecurity</span> <span class="hashtag">#Mentorship</span>', 
+      likes: 651, 
+      comments: 93, 
+      shares: 27,
+      color: '#f59e0b,#ef4444' 
+    },
+    { 
+      user: 'Riley Zhang', 
+      handle: '@rileyz', 
+      time: '12h ago', 
+      verified: true,
+      channel: 'Creative & Code',
+      content: 'Built a custom SIEM visualization dashboard this weekend. Python + Elasticsearch + Grafana = 🔥 Live metrics, automated threat detection, and real-time alerts.', 
+      likes: 528, 
+      comments: 76, 
+      shares: 54,
+      color: '#ec4899,#f97316' 
+    },
+    { 
+      user: 'Sam Torres', 
+      handle: '@samt', 
+      time: '1d ago', 
+      verified: false,
+      channel: 'Events & Network',
+      content: 'Attending RSA Conference next week! Who else will be in San Francisco? Let\'s connect and grab coffee! 🤝 <span class="hashtag">#RSAC2026</span> <span class="hashtag">#Infosec</span>', 
+      likes: 193, 
+      comments: 41, 
+      shares: 16,
+      color: '#6d28d9,#0ea5e9' 
+    },
   ];
+
   grid.innerHTML = mockPosts.map((p, i) => `
-    <div class="content-card" style="animation:fadeInUp .4s ease ${i * 0.08}s both">
+    <div class="content-card" style="animation:fadeInUp .35s ease ${i * 0.06}s both">
       <div class="cc-header">
         <div class="cc-avatar" style="background:linear-gradient(135deg,${p.color})">${p.user[0]}</div>
-        <div class="cc-meta"><span class="cc-name">${p.user}</span><span class="cc-handle">${p.handle} · ${p.time}</span></div>
-        <button class="cc-more">⋯</button>
+        <div class="cc-meta">
+          <div class="cc-author-row">
+            <span class="cc-name">${p.user}</span>
+            ${p.verified ? '<span class="cc-badge-verified">✦ VERIFIED</span>' : ''}
+            <span class="cc-channel-tag">${p.channel}</span>
+          </div>
+          <span class="cc-handle">${p.handle} · ${p.time}</span>
+        </div>
+        <button class="cc-more" onclick="showToast('Post options')">⋯</button>
       </div>
       <div class="cc-body">${p.content}</div>
       <div class="cc-actions">
-        <button class="cc-action" onclick="showToast('❤️ Liked!')">❤️ ${p.likes}</button>
-        <button class="cc-action" onclick="showToast('💬 Comments')">💬 ${p.comments}</button>
-        <button class="cc-action" onclick="showToast('🔁 Shared!')">🔁</button>
-        <button class="cc-action" onclick="showToast('🔖 Saved!')">🔖</button>
+        <button class="cc-action" onclick="togglePostLike(this, ${p.likes})">
+          <span class="action-icon">🤍</span> <span class="action-count">${p.likes}</span>
+        </button>
+        <button class="cc-action" onclick="showToast('💬 Opening comments...')">
+          <span class="action-icon">💬</span> <span>${p.comments}</span>
+        </button>
+        <button class="cc-action" onclick="togglePostRepost(this, ${p.shares})">
+          <span class="action-icon">🔁</span> <span>${p.shares}</span>
+        </button>
+        <button class="cc-action" onclick="togglePostSave(this)">
+          <span class="action-icon">🔖</span> <span>Save</span>
+        </button>
       </div>
     </div>
   `).join('');
+}
+
+function togglePostLike(btn, baseCount) {
+  const icon = btn.querySelector('.action-icon');
+  const count = btn.querySelector('.action-count');
+  const isLiked = btn.classList.toggle('liked');
+  if (isLiked) {
+    icon.textContent = '❤️';
+    count.textContent = baseCount + 1;
+    showToast('❤️ Sparked!');
+  } else {
+    icon.textContent = '🤍';
+    count.textContent = baseCount;
+  }
+}
+
+function togglePostRepost(btn, baseCount) {
+  const isReposted = btn.classList.toggle('reposted');
+  if (isReposted) {
+    showToast('🔁 Amplified to your orbit!');
+  }
+}
+
+function togglePostSave(btn) {
+  const isSaved = btn.classList.toggle('saved');
+  showToast(isSaved ? '🔖 Post saved to bookmarks!' : 'Removed from bookmarks');
+}
+
+function publishQuickPost() {
+  const input = document.getElementById('quickPostInput');
+  const val = input ? input.value.trim() : '';
+  if (!val) {
+    showToast('⚠️ Please write something before transmitting');
+    return;
+  }
+  const grid = document.getElementById('contentGrid');
+  if (grid) {
+    const newPost = document.createElement('div');
+    newPost.className = 'content-card';
+    newPost.style.animation = 'fadeInUp .35s ease both';
+    newPost.innerHTML = `
+      <div class="cc-header">
+        <div class="cc-avatar" style="background:linear-gradient(135deg,#7c3aed,#ec4899)">K</div>
+        <div class="cc-meta">
+          <div class="cc-author-row">
+            <span class="cc-name">Kwesi Asiedu</span>
+            <span class="cc-badge-verified">✦ YOU</span>
+            <span class="cc-channel-tag">Professional</span>
+          </div>
+          <span class="cc-handle">@kwesi · Just now</span>
+        </div>
+        <button class="cc-more" onclick="showToast('Post options')">⋯</button>
+      </div>
+      <div class="cc-body">${val}</div>
+      <div class="cc-actions">
+        <button class="cc-action" onclick="togglePostLike(this, 1)">
+          <span class="action-icon">🤍</span> <span class="action-count">1</span>
+        </button>
+        <button class="cc-action" onclick="showToast('💬 Comments')">
+          <span class="action-icon">💬</span> <span>0</span>
+        </button>
+        <button class="cc-action" onclick="togglePostRepost(this, 0)">
+          <span class="action-icon">🔁</span> <span>0</span>
+        </button>
+        <button class="cc-action" onclick="togglePostSave(this)">
+          <span class="action-icon">🔖</span> <span>Save</span>
+        </button>
+      </div>
+    `;
+    grid.insertBefore(newPost, grid.firstChild);
+  }
+  if (input) input.value = '';
+  showToast('📡 Transmitted live to SPHERA network!');
+}
+
+function quickAIEnhance() {
+  const input = document.getElementById('quickPostInput');
+  if (!input) return;
+  const current = input.value.trim();
+  if (!current) {
+    input.value = 'Excited to share insights on modern zero-trust architecture and enterprise cloud defense. Key takeaway: continuous verification is essential. #CyberSecurity #ZeroTrust #InfoSec';
+  } else {
+    input.value = current + ' ✨ Enhanced with AI #CyberSecurity #ZeroTrust';
+  }
+  showToast('✦ Draft polished by Orbit Copilot');
 }
 
 // ── Marquee ───────────────────────────────────────────────────

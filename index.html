@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=45" />
+  <link rel="stylesheet" href="style.css?v=46" />
   <!-- PDF.js for resume parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -510,49 +510,43 @@
 
         <!-- Stories bar -->
         <div class="stories-bar" id="storiesBar">
-          <div class="story-add-card" id="addStoryBtn">
+          <div class="story-add-card" id="addStoryBtn" onclick="showToast('📸 Add to your 24h story')">
             <div class="story-plus">+</div>
-            <p class="story-label">Add Story</p>
+            <p class="story-label">Your Story</p>
           </div>
-          <div class="story-card" data-story="0">
-            <img src="post1.png" class="story-bg" alt="" />
+          <div class="story-card" data-story="0" onclick="showToast('Viewing Kwesi\'s story...')">
             <div class="story-ring story-ring-unseen"></div>
-            <img src="avatar.png" class="story-avatar" alt="" />
+            <div class="story-avatar-grad" style="background:linear-gradient(135deg,#7c3aed,#ec4899)">K</div>
             <p class="story-username">You</p>
           </div>
-          <div class="story-card" data-story="1">
-            <img src="post2.png" class="story-bg" alt="" />
-            <div class="story-ring"></div>
-            <div class="story-avatar-grad">A</div>
+          <div class="story-card" data-story="1" onclick="showToast('Viewing Alex\'s story...')">
+            <div class="story-ring story-ring-unseen"></div>
+            <div class="story-avatar-grad" style="background:linear-gradient(135deg,#0ea5e9,#6d28d9)">A</div>
             <p class="story-username">Alex</p>
           </div>
-          <div class="story-card" data-story="2">
-            <img src="post3.png" class="story-bg" alt="" />
-            <div class="story-ring"></div>
-            <div class="story-avatar-grad sg2">J</div>
+          <div class="story-card" data-story="2" onclick="showToast('Viewing Jordan\'s story...')">
+            <div class="story-ring story-ring-unseen"></div>
+            <div class="story-avatar-grad" style="background:linear-gradient(135deg,#10b981,#0ea5e9)">J</div>
             <p class="story-username">Jordan</p>
           </div>
-          <div class="story-card" data-story="3">
-            <img src="post2.png" class="story-bg" alt="" style="filter:hue-rotate(60deg)" />
+          <div class="story-card" data-story="3" onclick="showToast('Viewing Maya\'s story...')">
             <div class="story-ring"></div>
-            <div class="story-avatar-grad sg3">M</div>
+            <div class="story-avatar-grad" style="background:linear-gradient(135deg,#db2777,#9333ea)">M</div>
             <p class="story-username">Maya</p>
           </div>
-          <div class="story-card" data-story="4">
-            <img src="post1.png" class="story-bg" alt="" style="filter:saturate(2) hue-rotate(180deg)" />
+          <div class="story-card" data-story="4" onclick="showToast('Viewing Riley\'s story...')">
             <div class="story-ring"></div>
-            <div class="story-avatar-grad sg4">R</div>
+            <div class="story-avatar-grad" style="background:linear-gradient(135deg,#d97706,#dc2626)">R</div>
             <p class="story-username">Riley</p>
           </div>
-          <div class="story-card" data-story="5">
-            <img src="post3.png" class="story-bg" alt="" style="filter:grayscale(0.5)" />
+          <div class="story-card" data-story="5" onclick="showToast('Viewing Sam\'s story...')">
             <div class="story-ring"></div>
-            <div class="story-avatar-grad sg5">S</div>
+            <div class="story-avatar-grad" style="background:linear-gradient(135deg,#059669,#0ea5e9)">S</div>
             <p class="story-username">Sam</p>
           </div>
         </div>
 
-        <!-- Category pills (CapCut Pro-style) -->
+        <!-- Category pills -->
         <div class="category-bar" id="categoryBar">
           <div class="cat-pills-wrap" id="catPillsWrap">
             <button class="cat-pill active-pill" data-cat="foryou">For You</button>
@@ -573,7 +567,26 @@
           </div>
         </div>
 
-        <!-- Content Grid (CapCut masonry style) -->
+        <!-- Feed Composer Box -->
+        <div style="max-width:680px;margin:18px auto 0;padding:16px 20px;background:rgba(17,17,37,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:16px;backdrop-filter:blur(16px);box-shadow:0 4px 20px rgba(0,0,0,0.3)">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px rgba(124,58,237,0.3)">K</div>
+            <div style="flex:1">
+              <input id="quickPostInput" placeholder="Share an insight, security advisory, or project update…" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:24px;padding:10px 18px;font-size:13.5px;outline:none;transition:all 0.2s" onfocus="this.style.borderColor='#7c3aed';this.style.background='rgba(255,255,255,0.08)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)';this.style.background='rgba(255,255,255,0.05)'" onkeydown="if(event.key==='Enter')publishQuickPost()"/>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;gap:8px">
+            <div style="display:flex;gap:4px">
+              <button onclick="showToast('📷 Image attachment added')" style="background:transparent;border:none;color:rgba(255,255,255,0.65);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px">📷 Photo</button>
+              <button onclick="showToast('🎥 Video studio clip attached')" style="background:transparent;border:none;color:rgba(255,255,255,0.65);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px">🎥 Video</button>
+              <button onclick="showToast('💼 Career signal broadcast')" style="background:transparent;border:none;color:rgba(255,255,255,0.65);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px">💼 Signal</button>
+              <button onclick="quickAIEnhance()" style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:#c4b5fd;font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:5px">✦ AI Draft</button>
+            </div>
+            <button onclick="publishQuickPost()" style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);border:none;color:#fff;border-radius:20px;padding:7px 22px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 0 14px rgba(124,58,237,0.35);transition:all 0.2s" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='none'">Transmit</button>
+          </div>
+        </div>
+
+        <!-- Content Grid -->
         <div class="content-grid" id="contentGrid">
           <!-- injected by JS -->
         </div>
