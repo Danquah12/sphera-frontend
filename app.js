@@ -88,6 +88,16 @@ function showPage(view) {
   if (view === 'pulse') initPulsePage();
   if (view === 'profile') initProfilePage();
   if (view === 'linkedup') initLinkedUpPage();
+  if (view === 'creatorstudio') initCreatorStudioPage();
+  if (view === 'spherapay') initSpheraPayPage();
+  if (view === 'spaces') initSpacesPage();
+  if (view === 'stories') initStoriesPage();
+  if (view === 'local') initLocalPage();
+  if (view === 'live') initLivePage();
+  if (view === 'bookclub') initBookclubPage();
+  if (view === 'recipehub') initRecipehubPage();
+  if (view === 'fitness') initFitnessPage();
+  if (view === 'timecapsule') initTimecapsulePage();
 }
 
 function setView(view) { showPage(view); }
@@ -997,85 +1007,544 @@ function initEventsGrid() {
 // ═══════════════════════════════════════════════════════════════
 // GROUPS / SPHERES
 // ═══════════════════════════════════════════════════════════════
-function initGroupsList() {
-  const list = document.getElementById('gsMyList');
-  if (!list || list.children.length > 0) return;
+const SPHERA_GROUPS = [
+  {
+    id: 'grp-1',
+    name: 'Cybersecurity Executives & CISOs',
+    members: '14.2K members',
+    category: 'Executive',
+    banner: '#7c3aed,#ec4899',
+    desc: 'Strategic leadership group for CISOs, Directors of Information Security, and executive advisors.',
+    posts: [
+      { author: 'Sarah Chen, CISO', time: '2h ago', content: 'What is your current posture on third-party SaaS risk scoring? We are migrating from static vendor questionnaires to continuous telemetry monitoring.', likes: 48, comments: 19 },
+      { author: 'Elena Rostova', time: '5h ago', content: 'NIST 800-53 Rev 5 compliance checklist template is now updated in the group files section.', likes: 82, comments: 24 }
+    ]
+  },
+  {
+    id: 'grp-2',
+    name: 'Zero Trust & Cloud Defense Network',
+    members: '9.8K members',
+    category: 'Architecture',
+    banner: '#0ea5e9,#6d28d9',
+    desc: 'Practitioners, engineers, and architects deploying continuous identity verification and microsegmentation.',
+    posts: [
+      { author: 'Marcus Vance', time: '1h ago', content: 'Comparing SPIFFE/SPIRE with Istio mTLS for workload identity in hybrid cloud. Thoughts?', likes: 35, comments: 12 }
+    ]
+  },
+  {
+    id: 'grp-3',
+    name: 'Federal IT Security & RMF Compliance',
+    members: '7.4K members',
+    category: 'Gov / Defense',
+    banner: '#059669,#10b981',
+    desc: 'Navigating FedRAMP High, DoD IL5/IL6, and continuous ATO pipelines.',
+    posts: [
+      { author: 'Kwesi Asiedu', time: '3h ago', content: 'Automating STIG compliance audits in AWS GovCloud with Terraform & OpenSCAP.', likes: 94, comments: 31 }
+    ]
+  }
+];
 
-  const groups = [
-    { name: 'Cybersecurity Executives & CISOs', members: '14.2K members', tag: 'Executive' },
-    { name: 'Zero Trust & Cloud Defense Network', members: '9.8K members', tag: 'Architecture' },
-    { name: 'Federal IT Security & RMF Compliance', members: '7.4K members', tag: 'Gov / Defense' },
-    { name: 'Offensive Security & Red Team Labs', members: '18.1K members', tag: 'Offensive' }
-  ];
+let _activeGroupId = 'grp-1';
 
-  list.innerHTML = groups.map(g => `
-    <div class="gs-item" onclick="showToast('Opening ${g.name} community...')" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
-      <div>
-        <div style="font-size:13.5px;font-weight:700;color:#fff">${g.name}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">🔮 ${g.members} · <span style="color:#a78bfa">${g.tag}</span></div>
+function initGroupsPage() {
+  const myList = document.getElementById('gsMyList');
+  const sugList = document.getElementById('gsSugList');
+
+  if (myList) {
+    myList.innerHTML = SPHERA_GROUPS.map(g => `
+      <div class="gs-item ${g.id === _activeGroupId ? 'active-gsi' : ''}" onclick="selectGroup('${g.id}')" style="background:${g.id === _activeGroupId ? 'rgba(124,58,237,0.18)' : 'rgba(255,255,255,0.03)'};border:1px solid ${g.id === _activeGroupId ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.06)'};border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <div>
+          <div style="font-size:13.5px;font-weight:700;color:#fff">${g.name}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">🔮 ${g.members} · <span style="color:#a78bfa">${g.category}</span></div>
+        </div>
+        <button onclick="event.stopPropagation(); showToast('✓ In Group')" style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:#c4b5fd;border-radius:16px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer">Joined</button>
       </div>
-      <button onclick="event.stopPropagation(); showToast('✓ Joined ${g.name}')" style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:#c4b5fd;border-radius:16px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer">Joined</button>
+    `).join('');
+  }
+
+  if (sugList) {
+    const sug = [
+      { name: 'Bug Bounty Hunters & 0day Labs', members: '22.4K', cat: 'Offensive' },
+      { name: 'Kubernetes & Container Hardening', members: '8.1K', cat: 'DevSecOps' }
+    ];
+    sugList.innerHTML = sug.map(s => `
+      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:#fff">${s.name}</div>
+          <div style="font-size:10.5px;color:rgba(255,255,255,0.4)">${s.members} members</div>
+        </div>
+        <button onclick="showToast('✓ Request sent to join ${s.name}')" style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);border:none;color:#fff;border-radius:14px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer">+ Join</button>
+      </div>
+    `).join('');
+  }
+
+  selectGroup(_activeGroupId);
+}
+
+function selectGroup(groupId) {
+  _activeGroupId = groupId;
+  const group = SPHERA_GROUPS.find(g => g.id === groupId) || SPHERA_GROUPS[0];
+  const main = document.getElementById('groupsMain');
+  if (!main) return;
+
+  main.innerHTML = `
+    <div style="padding:20px;max-width:760px">
+      <!-- Group Header Banner -->
+      <div style="background:linear-gradient(135deg,${group.banner});border-radius:18px;padding:28px 24px;color:#fff;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,0.35)">
+        <span style="background:rgba(0,0,0,0.4);backdrop-filter:blur(6px);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">${group.category}</span>
+        <h2 style="font-size:22px;font-weight:800;margin:8px 0 6px">${group.name}</h2>
+        <p style="font-size:13.5px;opacity:0.9;margin:0 0 16px;max-width:540px">${group.desc}</p>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:12px;font-weight:700">🔮 ${group.members}</span>
+          <button onclick="showToast('📢 Notification settings updated')" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer">🔔 Joined</button>
+          <button onclick="showToast('📤 Invite link copied!')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer">Invite</button>
+        </div>
+      </div>
+
+      <!-- Post Composer -->
+      <div style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px 20px;margin-bottom:20px">
+        <input id="grpPostInput" placeholder="Start a discussion in ${group.name}…" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:20px;padding:10px 16px;font-size:13px;outline:none" onkeydown="if(event.key==='Enter')showToast('Discussion transmitted to group!')"/>
+      </div>
+
+      <!-- Discussions Feed -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        ${group.posts.map(p => `
+          <div style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px 20px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,${group.banner});display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff">${p.author[0]}</div>
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#fff">${p.author}</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4)">${p.time}</div>
+              </div>
+            </div>
+            <p style="font-size:13.5px;color:rgba(255,255,255,0.85);line-height:1.6;margin-bottom:14px">${p.content}</p>
+            <div style="display:flex;gap:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">
+              <button onclick="showToast('❤️ Liked!')" style="background:transparent;border:none;color:rgba(255,255,255,0.6);font-size:12.5px;cursor:pointer">❤️ ${p.likes}</button>
+              <button onclick="showToast('💬 Replying...')" style="background:transparent;border:none;color:rgba(255,255,255,0.6);font-size:12.5px;cursor:pointer">💬 ${p.comments} Comments</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+// ═══════════════════════════════════════════════════════════════
+// ELEVATE LEARNING HUB
+// ═══════════════════════════════════════════════════════════════
+const ELEVATE_COURSES = [
+  {
+    id: 'course-1',
+    title: 'Practical Zero Trust Architecture & Implementation',
+    instructor: 'Dr. Marcus Vance, CISSP-ISSAP',
+    level: 'Advanced',
+    duration: '8 hrs · 12 modules',
+    rating: 4.9,
+    students: '1,420 enrolled',
+    color: '#7c3aed,#ec4899',
+    badge: 'Trending 🔥',
+    category: 'foryou'
+  },
+  {
+    id: 'course-2',
+    title: 'SANS SEC504: Incident Response & Threat Hunting',
+    instructor: 'Elena Rostova, GCFA',
+    level: 'Intermediate',
+    duration: '14 hrs · 18 modules',
+    rating: 4.95,
+    students: '2,890 enrolled',
+    color: '#0ea5e9,#6d28d9',
+    badge: 'Popular ✦',
+    category: 'paths'
+  },
+  {
+    id: 'course-3',
+    title: 'AWS Certified Security - Specialty Exam Deep Dive',
+    instructor: 'Priya Sharma, AWS Hero',
+    level: 'Advanced',
+    duration: '12 hrs · 15 modules',
+    rating: 4.85,
+    students: '3,100 enrolled',
+    color: '#10b981,#0ea5e9',
+    badge: 'Cert Prep',
+    category: 'certs'
+  },
+  {
+    id: 'course-4',
+    title: 'CISSP 8-Domain Mastery & 2026 Exam Simulator',
+    instructor: 'Kwesi Asiedu & Global Security Council',
+    level: 'Comprehensive',
+    duration: '24 hrs · 32 modules',
+    rating: 4.92,
+    students: '5,400 enrolled',
+    color: '#ef4444,#f59e0b',
+    badge: 'Must Have',
+    category: 'certs'
+  },
+  {
+    id: 'course-5',
+    title: 'Offensive Security Web Expert (OSWE) Lab Prep',
+    instructor: 'Bishop Fox Red Team Labs',
+    level: 'Expert',
+    duration: '16 hrs · 20 modules',
+    rating: 4.88,
+    students: '920 enrolled',
+    color: '#ec4899,#7c3aed',
+    badge: 'Hands-on',
+    category: 'paths'
+  },
+  {
+    id: 'course-6',
+    title: 'NIST SP 800-53 Rev 5 & Federal RMF Authorization',
+    instructor: 'Federal Cybersecurity Institute',
+    level: 'Intermediate',
+    duration: '6 hrs · 8 modules',
+    rating: 4.8,
+    students: '1,150 enrolled',
+    color: '#059669,#10b981',
+    badge: 'Gov / Defense',
+    category: 'foryou'
+  }
+];
+
+function initElevatePage() {
+  const goalsContainer = document.getElementById('elGoals');
+  if (goalsContainer) {
+    goalsContainer.innerHTML = `
+      <div style="padding:10px 0">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#fff;margin-bottom:6px">
+          <span>Zero Trust Architecture</span><span>75%</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+          <div style="width:75%;height:100%;background:linear-gradient(90deg,#7c3aed,#0ea5e9)"></div>
+        </div>
+      </div>
+      <div style="padding:10px 0">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#fff;margin-bottom:6px">
+          <span>CISSP Exam Prep</span><span>90%</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden">
+          <div style="width:90%;height:100%;background:linear-gradient(90deg,#10b981,#0ea5e9)"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderElevateCourses('foryou');
+
+  // Wire tab switching
+  document.querySelectorAll('.el-tab').forEach(tabBtn => {
+    tabBtn.onclick = () => {
+      document.querySelectorAll('.el-tab').forEach(b => b.classList.remove('active-eltab'));
+      tabBtn.classList.add('active-eltab');
+      const tab = tabBtn.dataset.eltab;
+      const courseGrid = document.getElementById('elCourseGrid');
+      const linkedInPanel = document.getElementById('elLinkedInPanel');
+
+      if (tab === 'linkedin') {
+        if (courseGrid) courseGrid.style.display = 'none';
+        if (linkedInPanel) linkedInPanel.style.display = 'flex';
+      } else {
+        if (courseGrid) courseGrid.style.display = 'grid';
+        if (linkedInPanel) linkedInPanel.style.display = 'none';
+        renderElevateCourses(tab);
+      }
+    };
+  });
+}
+
+function renderElevateCourses(cat = 'foryou') {
+  const grid = document.getElementById('elCourseGrid');
+  if (!grid) return;
+
+  const filtered = cat === 'foryou' ? ELEVATE_COURSES : ELEVATE_COURSES.filter(c => c.category === cat || cat === 'live');
+  const displayList = filtered.length > 0 ? filtered : ELEVATE_COURSES;
+
+  grid.innerHTML = displayList.map(c => `
+    <div class="el-course-card" onclick="showToast('📚 Opening course: ${c.title}')" style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+      <div style="height:130px;background:linear-gradient(135deg,${c.color});position:relative;display:flex;align-items:center;justify-content:center;padding:16px">
+        <span style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px">${c.badge}</span>
+        <div style="font-size:32px">🎓</div>
+        <span style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px">${c.duration}</span>
+      </div>
+      <div style="padding:16px">
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.35">${c.title}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:10px">By ${c.instructor}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:#a78bfa;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">
+          <span>★ ${c.rating} (${c.students})</span>
+          <span style="color:#10b981;font-weight:700">Start Course →</span>
+        </div>
+      </div>
     </div>
   `).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SPHEREVISION (WATCH)
+// REELS VERTICAL VIDEO FEED
 // ═══════════════════════════════════════════════════════════════
-function initWatchGrid() {
-  const grid = document.getElementById('watchGrid');
+function initReelsPage() {
+  const container = document.getElementById('reelsContainer');
+  if (!container) return;
+
+  // If already initialized beyond the prompt card, don't duplicate
+  if (container.querySelectorAll('.reel-sample-card').length > 0) return;
+
+  const sampleReels = [
+    {
+      id: 'reel-1',
+      creator: 'Alex Rivera',
+      handle: '@alexr',
+      verified: true,
+      caption: '3 Zero Trust architecture mistakes every security engineer makes in 2026 🔥 #ZeroTrust #CloudSec',
+      sound: 'Original Audio · Alex Rivera',
+      likes: '14.2K',
+      comments: '342',
+      color: '#7c3aed,#0ea5e9'
+    },
+    {
+      id: 'reel-2',
+      creator: 'Elena Rostova',
+      handle: '@elena_sec',
+      verified: true,
+      caption: 'Live demonstration: How we hunted an APT29 threat actor using YARA & Sigma rules 🛡️ #CyberSecurity #ThreatHunting',
+      sound: 'Cyber Defense Soundtrack · Elena',
+      likes: '28.9K',
+      comments: '618',
+      color: '#ec4899,#7c3aed'
+    },
+    {
+      id: 'reel-3',
+      creator: 'Marcus Johnson',
+      handle: '@marcus_oscp',
+      verified: false,
+      caption: 'Bypassing modern EDR solutions in 60 seconds with custom shellcode injection! ⚡ #RedTeam #OSCP',
+      sound: 'Techno Pulse Mix · Marcus',
+      likes: '41.5K',
+      comments: '912',
+      color: '#ef4444,#f59e0b'
+    }
+  ];
+
+  sampleReels.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'reel-card reel-sample-card';
+    card.style.cssText = `background:linear-gradient(180deg,rgba(0,0,0,0.2),rgba(0,0,0,0.85)), linear-gradient(135deg,${r.color});position:relative;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;min-height:540px;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,0.5)`;
+    card.innerHTML = `
+      <div style="position:absolute;top:20px;right:20px;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">
+        🔴 SPHERA REEL
+      </div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;cursor:pointer" onclick="showToast('▶ Playing Reel...')">
+        ▶
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;z-index:2">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,${r.color});display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;border:2px solid #fff">${r.creator[0]}</div>
+            <div>
+              <div style="font-weight:800;font-size:15px;color:#fff">${r.creator} ${r.verified ? '<span style="color:#38bdf8">✦</span>' : ''}</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.6)">${r.handle}</div>
+            </div>
+            <button onclick="showToast('✓ Following ${r.creator}')" style="background:rgba(255,255,255,0.2);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:8px">Follow</button>
+          </div>
+          <p style="font-size:13.5px;color:rgba(255,255,255,0.9);line-height:1.4;margin-bottom:8px">${r.caption}</p>
+          <div style="font-size:11.5px;color:#a78bfa;display:flex;align-items:center;gap:6px">🎵 ${r.sound}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+          <button onclick="showToast('❤️ Liked!')" style="background:rgba(255,255,255,0.15);border:none;width:44px;height:44px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;cursor:pointer"><span style="font-size:18px">❤️</span><span style="font-size:10px;font-weight:700">${r.likes}</span></button>
+          <button onclick="showToast('💬 Comments')" style="background:rgba(255,255,255,0.15);border:none;width:44px;height:44px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;cursor:pointer"><span style="font-size:18px">💬</span><span style="font-size:10px;font-weight:700">${r.comments}</span></button>
+          <button onclick="showToast('↗ Shared!')" style="background:rgba(255,255,255,0.15);border:none;width:44px;height:44px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;cursor:pointer"><span style="font-size:18px">↗</span><span style="font-size:10px;font-weight:700">Share</span></button>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPHERECHAT / MESSAGES
+// ═══════════════════════════════════════════════════════════════
+const SC_CONVOS = [
+  {
+    id: 'sc-1',
+    name: 'Sarah Chen, CISO',
+    avatar: 'S',
+    color: '#0ea5e9,#6d28d9',
+    lastMsg: 'Hey Kwesi, loved your post on Zero Trust architecture!',
+    time: '12m ago',
+    unread: 1,
+    messages: [
+      { sender: 'them', text: 'Hey Kwesi! Saw your latest post on Zero Trust Architecture and NIST 800-53 implementation.', time: '10:45 AM' },
+      { sender: 'them', text: 'Are you available next Tuesday for a quick sync regarding our federal cloud advisory panel?', time: '10:46 AM' },
+      { sender: 'me', text: 'Hi Sarah! Absolutely, Tuesday afternoon works great for me. I can share the latest automation framework we built.', time: '10:50 AM' },
+      { sender: 'them', text: 'Fantastic! I will send over the calendar invite and agenda.', time: '10:52 AM' }
+    ]
+  },
+  {
+    id: 'sc-2',
+    name: 'Marcus Johnson (OSCP)',
+    avatar: 'M',
+    color: '#7c3aed,#ec4899',
+    lastMsg: 'Are you taking the OSCP lab this weekend?',
+    time: '1h ago',
+    unread: 0,
+    messages: [
+      { sender: 'them', text: 'Hey Kwesi, did you check out the new buffer overflow practice boxes?', time: '9:15 AM' },
+      { sender: 'me', text: 'Yes, just completed Box 3! The pivoting technique was tricky.', time: '9:20 AM' }
+    ]
+  },
+  {
+    id: 'sc-3',
+    name: 'Zero Trust Working Group',
+    avatar: 'Z',
+    color: '#10b981,#0ea5e9',
+    lastMsg: 'Jordan: Next meeting scheduled for Thursday 2pm',
+    time: '3h ago',
+    unread: 0,
+    messages: [
+      { sender: 'them', text: 'Reminder: Draft RFC for identity microsegmentation is open for comments.', time: '8:00 AM' }
+    ]
+  }
+];
+
+let _activeScConvoId = 'sc-1';
+
+function initMessagesPage() {
+  renderScConvos();
+  selectScConvo(_activeScConvoId);
+}
+
+function renderScConvos() {
+  const list = document.getElementById('scConvoList');
+  if (!list) return;
+
+  list.innerHTML = SC_CONVOS.map(c => `
+    <div class="sc-convo-item ${c.id === _activeScConvoId ? 'active-scc' : ''}" onclick="selectScConvo('${c.id}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;background:${c.id === _activeScConvoId ? 'rgba(124,58,237,0.15)' : 'transparent'}">
+      <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,${c.color});display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex-shrink:0">${c.avatar}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <span style="font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</span>
+          <span style="font-size:10.5px;color:rgba(255,255,255,0.4)">${c.time}</span>
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.lastMsg}</div>
+      </div>
+      ${c.unread ? '<div style="width:8px;height:8px;border-radius:50%;background:#0ea5e9"></div>' : ''}
+    </div>
+  `).join('');
+}
+
+function selectScConvo(convoId) {
+  _activeScConvoId = convoId;
+  renderScConvos();
+  const convo = SC_CONVOS.find(c => c.id === convoId) || SC_CONVOS[0];
+  const center = document.getElementById('scCenter');
+  if (!center) return;
+
+  center.innerHTML = `
+    <div style="display:flex;flex-direction:column;height:100%;background:var(--bg)">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(17,17,37,0.85);backdrop-filter:blur(12px)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,${convo.color});display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff">${convo.avatar}</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#fff">${convo.name}</div>
+            <div style="font-size:11px;color:#10b981">🟢 Active in Orbit</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="showToast('📞 Initiating secure voice call...')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer">📞</button>
+          <button onclick="showToast('🎥 Initiating encrypted video session...')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer">🎥</button>
+        </div>
+      </div>
+
+      <!-- Thread -->
+      <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px">
+        ${convo.messages.map(m => `
+          <div style="display:flex;flex-direction:column;align-items:${m.sender === 'me' ? 'flex-end' : 'flex-start'}">
+            <div style="max-width:70%;padding:10px 16px;border-radius:16px;font-size:13.5px;line-height:1.5;background:${m.sender === 'me' ? 'linear-gradient(135deg,#7c3aed,#0ea5e9)' : 'rgba(255,255,255,0.08)'};color:#fff;border:${m.sender === 'me' ? 'none' : '1px solid rgba(255,255,255,0.1)'}">
+              ${m.text}
+            </div>
+            <span style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">${m.time}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Input Box -->
+      <div style="padding:14px 20px;border-top:1px solid rgba(255,255,255,0.08);background:rgba(17,17,37,0.9);display:flex;align-items:center;gap:10px">
+        <button onclick="showToast('📎 Attach file / document')" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer">📎</button>
+        <input id="scInputMessage" placeholder="Type an encrypted message…" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#fff;border-radius:24px;padding:10px 18px;font-size:13.5px;outline:none" onkeydown="if(event.key==='Enter')sendScMessage()"/>
+        <button onclick="sendScMessage()" style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);border:none;color:#fff;border-radius:20px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer">Send</button>
+      </div>
+    </div>
+  `;
+}
+
+function sendScMessage() {
+  const input = document.getElementById('scInputMessage');
+  const text = input ? input.value.trim() : '';
+  if (!text) return;
+  const convo = SC_CONVOS.find(c => c.id === _activeScConvoId);
+  if (convo) {
+    convo.messages.push({ sender: 'me', text, time: 'Just now' });
+    selectScConvo(_activeScConvoId);
+  }
+  showToast('🔒 Message transmitted via encrypted protocol');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPHERAMATCH (AI MATCHING DECK)
+// ═══════════════════════════════════════════════════════════════
+function initLinkedUpPage() {
+  const stage = document.getElementById('luCardStage');
+  if (!stage || stage.children.length > 0) return;
+
+  const matches = [
+    { name: 'Dr. Sarah Lin, PhD', role: 'AI Security Researcher', org: 'MIT / Defense Tech', match: 98, color: '#7c3aed,#ec4899', bio: 'Specializing in LLM adversarial robustness, red teaming generative models, and automated vulnerability detection.', tags: ['AI Red Teaming', 'LLM Defense', 'Python', 'PyTorch'] },
+    { name: 'Marcus Vance, CISSP', role: 'Lead Zero Trust Architect', org: 'Cyber Defense Systems', match: 95, color: '#0ea5e9,#6d28d9', bio: 'Spearheading identity federation and continuous posture verification for federal defense agencies.', tags: ['Zero Trust', 'NIST 800-53', 'AWS GovCloud', 'Okta'] },
+    { name: 'Amara Okafor', role: 'Staff Cloud Detection Engineer', org: 'CrowdStrike', match: 92, color: '#10b981,#0ea5e9', bio: 'Building real-time detection pipelines and automated remediation across Kubernetes microservices.', tags: ['Detection Eng', 'Falcon', 'Go', 'Kubernetes'] }
+  ];
+
+  stage.innerHTML = matches.map((m, i) => `
+    <div class="lu-card" style="background:rgba(17,17,37,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px;position:relative;max-width:420px;margin:0 auto;box-shadow:0 12px 40px rgba(0,0,0,0.5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,${m.color});display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff">${m.name[0]}</div>
+        <span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);color:#10b981;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px">✦ ${m.match}% Match</span>
+      </div>
+      <h3 style="font-size:18px;font-weight:800;color:#fff;margin-bottom:4px">${m.name}</h3>
+      <div style="font-size:13px;color:#a78bfa;font-weight:600;margin-bottom:12px">${m.role} · ${m.org}</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.5;margin-bottom:16px">${m.bio}</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+        ${m.tags.map(t => `<span style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:#c4b5fd;font-size:11px;font-weight:600;padding:2px 10px;border-radius:12px">${t}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:12px">
+        <button onclick="showToast('Pass')" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);border-radius:14px;padding:10px;font-weight:700;cursor:pointer">✕ Pass</button>
+        <button onclick="showToast('💘 Connected with ${m.name}!')" style="flex:1;background:linear-gradient(135deg,#ec4899,#7c3aed);border:none;color:#fff;border-radius:14px;padding:10px;font-weight:800;cursor:pointer;box-shadow:0 0 16px rgba(236,72,153,0.4)">💘 Connect Orbit</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DISCOVER
+// ═══════════════════════════════════════════════════════════════
+function initDiscoverGrid() {
+  const grid = document.getElementById('discoverGrid');
   if (!grid || grid.children.length > 0) return;
 
-  const videos = [
-    { title: 'Deconstructing Nation-State Cyber Attacks in 2026', author: 'CyberWatch Global', views: '42K views', duration: '28:45', color: '#7c3aed,#ec4899' },
-    { title: 'Zero Trust Architecture from Scratch: Live AWS Demo', author: 'CloudSec Pro', views: '89K views', duration: '45:10', color: '#0ea5e9,#6d28d9' },
-    { title: 'OSCP Exam Walkthrough & Buffer Overflow Tactics', author: 'Offensive Labs', views: '115K views', duration: '1:12:00', color: '#ef4444,#f59e0b' },
-    { title: 'AI-Powered Security Operations: Automated Threat Hunting', author: 'Google Security', views: '64K views', duration: '34:20', color: '#10b981,#0ea5e9' }
+  const items = [
+    { title: 'Cybersecurity & Defense', icon: '🛡️', color: '#0ea5e9', desc: '14.8K pulses today' },
+    { title: 'Zero Trust Architecture', icon: '🔐', color: '#7c3aed', desc: '8.4K pulses today' },
+    { title: 'Cloud & Kubernetes Security', icon: '☁️', color: '#10b981', desc: '6.2K pulses today' },
+    { title: 'AI & Machine Learning Red Teaming', icon: '🤖', color: '#ec4899', desc: '11.5K pulses today' },
+    { title: 'Offensive Security & Pentesting', icon: '🎯', color: '#ef4444', desc: '9.1K pulses today' },
+    { title: 'Federal Compliance & RMF', icon: '🏛️', color: '#f59e0b', desc: '4.7K pulses today' }
   ];
 
-  grid.innerHTML = videos.map(v => `
-    <div class="watch-card" onclick="showToast('▶ Playing: ${v.title}')" style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
-      <div style="height:160px;background:linear-gradient(135deg,${v.color});position:relative;display:flex;align-items:center;justify-content:center">
-        <div style="width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff">▶</div>
-        <span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.8);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">${v.duration}</span>
-      </div>
-      <div style="padding:14px">
-        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.4">${v.title}</div>
-        <div style="font-size:12px;color:#a78bfa;margin-bottom:2px">${v.author} ✦</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.4)">${v.views} · 3 days ago</div>
-      </div>
+  grid.innerHTML = items.map(it => `
+    <div class="discover-card" style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:22px;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'" onclick="showToast('Exploring topic: ${it.title}...')">
+      <div style="font-size:32px;margin-bottom:10px">${it.icon}</div>
+      <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px">${it.title}</div>
+      <div style="font-size:12px;color:#a78bfa">${it.desc}</div>
     </div>
   `).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// LIVE PULSE
-// ═══════════════════════════════════════════════════════════════
-function initPulseStreams() {
-  const streams = document.getElementById('pulseStreams');
-  if (!streams || streams.children.length > 0) return;
-
-  const topics = [
-    { topic: '#CyberSecurity', count: '18.4K', trend: '↑ +34%', active: '340 Live' },
-    { topic: '#ZeroTrust', count: '12.1K', trend: '↑ +58%', active: '210 Live' },
-    { topic: '#CISSP', count: '9.3K', trend: '↑ +12%', active: '145 Live' },
-    { topic: '#CloudSec', count: '8.7K', trend: '→ +8%', active: '98 Live' },
-    { topic: '#CareerOrbit', count: '15.6K', trend: '↑ +85%', active: '420 Live' }
-  ];
-
-  streams.innerHTML = topics.map(s => `
-    <div class="pulse-stream-item" onclick="showToast('Joining stream ${s.topic}...')" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
-      <div>
-        <div style="font-size:14px;font-weight:700;color:#fff">${s.topic}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.5)">${s.count} total signals · <span style="color:#10b981;font-weight:700">${s.trend}</span></div>
-      </div>
-      <span style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px">🔴 ${s.active}</span>
-    </div>
-  `).join('');
-}
-
-function initLinkedUpPage() {
-  /* SpheraMatch initialized */
 }
 
 // ── Reels Video Upload ────────────────────────────────────────
@@ -1092,11 +1561,87 @@ function handleReelVideoChange(input) {
 }
 function addDemoReels() { showToast('🎬 Demo reels added!'); }
 
-// ── YouTube Connect ───────────────────────────────────────────
-function openYTConnect() { toggleModal('ytChannelModal', true); document.getElementById('ytChannelModal')?.classList.remove('hidden'); }
-function closeYTConnect() { const m = document.getElementById('ytChannelModal'); if (m) m.classList.add('hidden'); }
-function loadYTChannel() { showToast('📺 Loading YouTube channel...'); }
-function importYTReels() { showToast('✦ Importing selected videos as Reels!'); closeYTConnect(); }
+// ═══════════════════════════════════════════════════════════════
+// CREATOR STUDIO
+// ═══════════════════════════════════════════════════════════════
+function initCreatorStudioPage() {
+  const ov = document.getElementById('csOverviewCards');
+  if (ov && ov.children.length === 0) {
+    const kpis = [
+      { label: '30-Day Reach', value: '142.8K', trend: '↑ +32.4%', color: '#7c3aed' },
+      { label: 'Impressions', value: '840.2K', trend: '↑ +18.7%', color: '#0ea5e9' },
+      { label: 'Follower Growth', value: '+1,240', trend: '↑ +45.1%', color: '#10b981' },
+      { label: 'Creator Earnings', value: '$4,850.00', trend: '↑ +28.0%', color: '#f59e0b' }
+    ];
+    ov.innerHTML = kpis.map(k => `
+      <div style="background:rgba(17,17,37,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px">${k.label}</div>
+        <div style="font-size:24px;font-weight:800;color:#fff;margin-bottom:4px">${k.value}</div>
+        <div style="font-size:11px;font-weight:700;color:${k.color}">${k.trend} vs last month</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPHERA PAY
+// ═══════════════════════════════════════════════════════════════
+function initSpheraPayPage() {
+  const tx = document.getElementById('payTransactions');
+  if (tx && tx.children.length === 0) {
+    const txs = [
+      { desc: 'Federal Cloud Advisory Retainer', type: 'incoming', amount: '+$1,200.00', date: 'Today · 2:15 PM', color: '#10b981' },
+      { desc: 'AWS Security Testing Sandbox', type: 'outgoing', amount: '-$124.50', date: 'Yesterday', color: '#ef4444' },
+      { desc: 'Bazaar Marketplace Order #8491', type: 'incoming', amount: '+$350.00', date: 'Aug 24', color: '#10b981' },
+      { desc: 'Sphera Studio AI Cloud Compute', type: 'outgoing', amount: '-$45.00', date: 'Aug 21', color: '#ef4444' }
+    ];
+    tx.innerHTML = txs.map(t => `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:13.5px;font-weight:700;color:#fff">${t.desc}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4)">${t.date}</div>
+        </div>
+        <div style="font-size:15px;font-weight:800;color:${t.color}">${t.amount}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPACES (LIVE AUDIO ROOMS)
+// ═══════════════════════════════════════════════════════════════
+function initSpacesPage() {
+  const grid = document.getElementById('spacesGrid');
+  if (grid && grid.children.length === 0) {
+    const spaces = [
+      { title: '🔴 CISO Roundtable: Defending Against Autonomous AI Threats', host: 'Sarah Chen & Kwesi Asiedu', listeners: '342 listening', color: '#ef4444,#7c3aed' },
+      { title: '🎙 Tech Resume Roast & Live Career Coaching', host: 'Jordan Chen (CrowdStrike)', listeners: '189 listening', color: '#0ea5e9,#6d28d9' },
+      { title: '⚡ Red Team Tactics: Live Exploit Walkthrough', host: 'Bishop Fox Labs', listeners: '512 listening', color: '#10b981,#0ea5e9' }
+    ];
+    grid.innerHTML = spaces.map(s => `
+      <div class="space-card" onclick="showToast('🎙 Joining Space: ${s.title}')" style="background:linear-gradient(135deg,${s.color});border-radius:18px;padding:24px;color:#fff;cursor:pointer;margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,0.3)">
+        <span style="background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:700">🔴 LIVE AUDIO</span>
+        <h3 style="font-size:17px;font-weight:800;margin:10px 0 6px">${s.title}</h3>
+        <div style="font-size:12.5px;opacity:0.9;margin-bottom:14px">Hosted by ${s.host}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;font-weight:700">👥 ${s.listeners}</span>
+          <button style="background:#fff;color:#000;border:none;border-radius:20px;padding:6px 18px;font-size:12px;font-weight:800;cursor:pointer">Join Room →</button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STORIES & LIVE
+// ═══════════════════════════════════════════════════════════════
+function initStoriesPage() { /* Stories handled by initStories */ }
+function initLivePage() { /* Live broadcast initialized */ }
+function initLocalPage() { /* Local meetups initialized */ }
+function initBookclubPage() { /* Book club initialized */ }
+function initRecipehubPage() { /* Recipe hub initialized */ }
+function initFitnessPage() { /* Fitness initialized */ }
+function initTimecapsulePage() { /* Time capsule initialized */ }
 
 // ── Video Creator / Studio ────────────────────────────────────
 function spheraVideoCreator() { showToast('🎞️ SpheraReel AI Video Creator — Opening InVideo...'); window.open('https://invideo.io', '_blank'); }
