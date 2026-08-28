@@ -373,7 +373,80 @@ function initEventsPage() { initEventsGrid(); }
 function initGroupsPage() { initGroupsList(); }
 function initWatchPage() { initWatchGrid(); }
 function initPulsePage() { initPulseStreams(); }
-function initMarketplacePage() { /* Marketplace HTML */ }
+async function initMarketplacePage() {
+  const grid = document.getElementById('mkpItemGrid');
+  const countEl = document.getElementById('mkpResultCount');
+  if (!grid) return;
+
+  grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Loading products...</div>';
+
+  try {
+    const res = await fetch(`${typeof SPHERA_API !== 'undefined' ? SPHERA_API : 'https://sphera-backend-alpha.vercel.app/api/v1'}/bazaar/products?limit=40`);
+    const data = await res.json();
+    const products = data.products || data.items || data || [];
+
+    if (countEl) countEl.textContent = `${products.length} results`;
+
+    if (products.length === 0) {
+      grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No products found</div>';
+      return;
+    }
+
+    grid.innerHTML = products.map(p => `
+      <div class="mkp-item-card" style="background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+        <div style="height:180px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <img src="${p.image || p.img || p.images?.[0] || 'https://via.placeholder.com/300x180?text='+encodeURIComponent(p.name || p.title || 'Product')}" 
+               alt="${p.name || p.title || ''}" 
+               style="width:100%;height:100%;object-fit:cover" 
+               onerror="this.src='https://via.placeholder.com/300x180?text=Product'"/>
+        </div>
+        <div style="padding:12px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name || p.title || 'Product'}</div>
+          <div style="color:#10b981;font-weight:700;font-size:16px;margin-bottom:4px">$${(p.price || p.sale_price || 0).toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${p.category || p.type || 'General'}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:12px;color:#f59e0b">★ ${(p.rating || 4.5).toFixed(1)}</span>
+            <span style="font-size:11px;color:var(--muted)">${p.condition || 'New'}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    console.error('Bazaar fetch error:', err);
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Could not load products. Please try again.</div>';
+  }
+}
+
+// ── Bazaar modal handlers ─────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const myBazaarBtn = document.getElementById('mkpMyOrbitBtn');
+  const sellBtn = document.getElementById('mkpSellBtn');
+  const myBazaarModal = document.getElementById('mkpMyOrbitModal');
+  const sellModal = document.getElementById('mkpSellModal');
+  const orbitClose = document.getElementById('mkpOrbitClose');
+  const sellClose = document.getElementById('mkpSellClose');
+
+  if (myBazaarBtn && myBazaarModal) {
+    myBazaarBtn.addEventListener('click', () => {
+      myBazaarModal.classList.remove('hidden');
+      const content = document.getElementById('mkpOrbitContent');
+      if (content && !content.innerHTML.trim()) {
+        content.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)"><p style="font-size:16px;margin-bottom:8px">Welcome to My BAZAAR</p><p style="font-size:13px">Your buying, selling, watchlist, bids, and feedback — all in one place.</p><p style="font-size:12px;margin-top:16px;color:#a78bfa">Sign in to view your marketplace activity</p></div>';
+      }
+    });
+  }
+  if (sellBtn && sellModal) {
+    sellBtn.addEventListener('click', () => sellModal.classList.remove('hidden'));
+  }
+  if (orbitClose && myBazaarModal) {
+    orbitClose.addEventListener('click', () => myBazaarModal.classList.add('hidden'));
+  }
+  if (sellClose && sellModal) {
+    sellClose.addEventListener('click', () => sellModal.classList.add('hidden'));
+  }
+});
+
 function initElevatePage() { /* Elevate HTML */ }
 
 function initDiscoverGrid() {

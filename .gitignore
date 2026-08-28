@@ -21,3 +21,4 @@ Thumbs.db
 
 # Broken backups
 *.broken
+.vercel

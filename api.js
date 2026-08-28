@@ -6,10 +6,10 @@
  */
 
 const _isProd = location.hostname !== 'localhost' && location.hostname !== '127.0.0.1';
-const SPHERA_BACKEND = 'https://sphera-api.onrender.com';
+const SPHERA_BACKEND = 'https://sphera-backend-alpha.vercel.app';
 const SPHERA_API = _isProd ? `${SPHERA_BACKEND}/api/v1` : 'http://127.0.0.1:8001/api/v1';
 const SPHERA_WS = _isProd
-    ? `wss://sphera-api.onrender.com/ws`
+    ? `wss://sphera-backend-alpha.vercel.app/ws`
     : 'ws://127.0.0.1:8001/ws';
 
 // ── Token management ──────────────────────────────────────────
