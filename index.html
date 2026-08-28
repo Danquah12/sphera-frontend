@@ -473,7 +473,7 @@
           <div class="me-menu-wrap" id="meManuWrap">
             <button class="me-btn" id="meBtn" onclick="toggleMeMenu()" title="Your profile & account">
               <div class="me-avatar-ring">
-                <div class="me-avatar" id="meAvatarEl">?</div>
+                <div class="me-avatar" id="meAvatarEl">K</div>
               </div>
               <span class="me-chevron">▾</span>
             </button>
@@ -481,7 +481,7 @@
             <div class="me-dropdown" id="meDropdown">
               <!-- User card at top -->
               <div class="me-card" id="meCard" onclick="openOwnProfile()">
-                <div class="me-card-avatar" id="meCardAvatar">?</div>
+                <div class="me-card-avatar" id="meCardAvatar">K</div>
                 <div class="me-card-info">
                   <div class="me-card-name" id="meCardName">Kwesi Asiedu</div>
                   <div class="me-card-username" id="meCardUsername">@kwesi</div>
@@ -650,6 +650,9 @@
             </button>
             <button class="nx-transmit-btn" id="nxTransmitOpen">
               ✦ Transmit
+            </button>
+            <button class="nx-navitem" onclick="window.open('https://sphera-social.vercel.app','_blank')" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(14,165,233,.15));border:1px solid rgba(124,58,237,.3);margin-top:8px;border-radius:10px">
+              <span class="nx-nav-icon">🌐</span><span>Social Suite ↗</span>
             </button>
             <div class="nx-user-row" id="nxUserRow">
               <div class="nx-user-av">Y</div>
@@ -1216,6 +1219,7 @@
           </div>
           <button id="coThemeFloatBtn" class="co-theme-float-btn" onclick="toggleCoThemePopup()"
             title="Switch CareerOrbit theme">🎨</button>
+          <a href="https://careerorbit-standalone.vercel.app" target="_blank" class="co-lp-signal-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:#fff;font-weight:700">💼 Standalone 44-Tool Suite ↗</a>
           <button class="co-lp-signal-btn" id="openSignalBtn" onclick="toggleOpenSignal()">📡 Open Signal: ON</button>
           <button class="co-lp-alerts-btn" id="orbitAlertsBtn" onclick="showOrbitAlerts()">🔔 Orbit Alerts</button>
           <button class="co-lp-edit" id="editLaunchpad">Edit Signal</button>
@@ -2261,7 +2265,7 @@
             <div class="lu-match-avatars">
               <div class="lu-match-av lu-match-av-you">K</div>
               <div class="lu-match-spark">✦</div>
-              <div class="lu-match-av lu-match-av-them" id="luMatchAvThem">?</div>
+              <div class="lu-match-av lu-match-av-them" id="luMatchAvThem">👤</div>
             </div>
             <button class="lu-match-msg-btn" onclick="luSendMessage()">💬 Send a Message</button>
             <button class="lu-match-continue-btn" onclick="luDismissMatch()">Keep Swiping</button>
@@ -2300,6 +2304,7 @@
             </div>
             <!-- Publish strip -->
             <div class="vs-pub-actions" id="vsPublishStrip" style="padding:8px 14px">
+              <a href="https://sphera-studio.vercel.app" target="_blank" class="vs-pub-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(236,72,153,.3));border:1px solid rgba(124,58,237,.5);color:#fff">🎬 Standalone Studio ↗</a>
               <span class="vs-pub-label">Publish to:</span>
               <button class="vs-pub-btn vs-pub-sphera" id="vsPubSphera" onclick="vsPublishTo('sphera')">
                 <span>✦</span> SPHERA
@@ -2688,6 +2693,7 @@
             </div>
           </div>
           <div class="mkp-topbar-right">
+            <a href="https://bazaar-standalone.vercel.app" target="_blank" class="mkp-my-orbit-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(14,165,233,.25));border:1px solid rgba(124,58,237,.45);color:#c4b5fd">🚀 Standalone BAZAAR ↗</a>
             <button class="mkp-my-orbit-btn" id="mkpMyOrbitBtn">📦 My BAZAAR</button>
             <button class="mkp-sell-btn" id="mkpSellBtn">⚡ Sell Now</button>
           </div>
