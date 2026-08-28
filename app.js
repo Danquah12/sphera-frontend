@@ -392,25 +392,36 @@ async function initMarketplacePage() {
       return;
     }
 
-    grid.innerHTML = products.map(p => `
-      <div class="mkp-item-card" style="background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
-        <div style="height:180px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;overflow:hidden">
-          <img src="${p.image || p.img || p.images?.[0] || 'https://via.placeholder.com/300x180?text='+encodeURIComponent(p.name || p.title || 'Product')}" 
-               alt="${p.name || p.title || ''}" 
-               style="width:100%;height:100%;object-fit:cover" 
-               onerror="this.src='https://via.placeholder.com/300x180?text=Product'"/>
-        </div>
-        <div style="padding:12px">
-          <div style="font-weight:600;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name || p.title || 'Product'}</div>
-          <div style="color:#10b981;font-weight:700;font-size:16px;margin-bottom:4px">$${(p.price || p.sale_price || 0).toFixed(2)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${p.category || p.type || 'General'}</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:12px;color:#f59e0b">★ ${(p.rating || 4.5).toFixed(1)}</span>
-            <span style="font-size:11px;color:var(--muted)">${p.condition || 'New'}</span>
+    grid.innerHTML = products.map(p => {
+      const rawPrice = typeof p.price === 'object' ? (p.price?.value ?? p.special_price?.value ?? 0) : (p.price ?? p.sale_price ?? 0);
+      const priceNum = parseFloat(rawPrice) || 0;
+      const title = p.name || p.title || 'Product';
+      const imgUrl = p.img || p.image || (Array.isArray(p.images) ? p.images[0] : null) || `https://via.placeholder.com/300x180?text=${encodeURIComponent(title)}`;
+      const cat = p.cat || p.category || p.type || 'General';
+      const rating = typeof p.rating === 'number' ? p.rating : 4.5;
+      const badge = p.badge ? `<span style="position:absolute;top:8px;left:8px;background:${p.badge==='hot'?'#ef4444':p.badge==='new'?'#10b981':'#f59e0b'};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase">${p.badge}</span>` : '';
+
+      return `
+        <div class="mkp-item-card" style="position:relative;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+          ${badge}
+          <div style="height:180px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;overflow:hidden">
+            <img src="${imgUrl}" 
+                 alt="${title}" 
+                 style="width:100%;height:100%;object-fit:cover" 
+                 onerror="this.src='https://via.placeholder.com/300x180?text=Product'"/>
+          </div>
+          <div style="padding:12px">
+            <div style="font-weight:600;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${title}</div>
+            <div style="color:#10b981;font-weight:700;font-size:16px;margin-bottom:4px">$${priceNum.toFixed(2)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${cat}</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:#f59e0b">★ ${rating.toFixed(1)}</span>
+              <span style="font-size:11px;color:var(--muted)">${p.condition || 'In Stock'}</span>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
   } catch (err) {
     console.error('Bazaar fetch error:', err);
