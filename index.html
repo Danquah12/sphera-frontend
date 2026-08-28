@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=46" />
+  <link rel="stylesheet" href="style.css?v=47" />
   <!-- PDF.js for resume parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -695,14 +695,14 @@
               <div class="nx-compose-bar" id="nxQuickCompose">
                 <div class="nx-compose-av">Y</div>
                 <input class="nx-compose-input" placeholder="What's transmitting across your universe?"
-                  id="nxQuickInput" readonly />
+                  id="nxQuickInput" onkeydown="if(event.key==='Enter')publishNexusTransmission()" />
                 <div class="nx-compose-media-btns">
-                  <button class="nx-qm-btn" title="Image">🖼</button>
+                  <button class="nx-qm-btn" title="Image" onclick="showToast('📷 Image attached')">🖼</button>
                   <button class="nx-qm-btn" title="Video" id="nxQmVideo" onclick="spheraVideoCreator()">🎬</button>
-                  <button class="nx-qm-btn" title="GIF">GIF</button>
-                  <button class="nx-qm-btn" title="Poll">📊</button>
+                  <button class="nx-qm-btn" title="GIF" onclick="showToast('GIF selector')">GIF</button>
+                  <button class="nx-qm-btn" title="Poll" onclick="showToast('📊 Poll creator')">📊</button>
                 </div>
-                <button class="nx-qtransmit-btn" id="nxQuickTransmit">Transmit</button>
+                <button class="nx-qtransmit-btn" id="nxQuickTransmit" onclick="publishNexusTransmission()">Transmit</button>
               </div>
 
               <!-- Feed -->

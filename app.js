@@ -521,29 +521,155 @@ function initNexusPage() {
 function initNexusFeed() {
   const feed = document.getElementById('nxFeed');
   if (!feed || feed.children.length > 0) return;
+
   const posts = [
-    { name:'Yaw Asiedu-Danquah', handle:'@yasiedudanquah', verified:true, time:'2h', text:'The convergence of AI and cybersecurity is creating unprecedented opportunities. Thread 🧵', sparks:284, echoes:47, amplifies:12 },
-    { name:'CyberWatch Global', handle:'@cyberwatchhq', verified:true, time:'4h', text:'BREAKING: Major zero-day vulnerability discovered in widely-used enterprise VPN software. Patch immediately. CVE-2026-XXXX', sparks:1823, echoes:934, amplifies:412 },
-    { name:'Sarah Mitchell', handle:'@sarahm_sec', verified:false, time:'6h', text:'Just completed my SANS SEC504 certification! The hands-on labs were incredible. Highly recommend for anyone in incident response. 🎓', sparks:647, echoes:89, amplifies:23 },
+    { 
+      name: 'Yaw Asiedu-Danquah', 
+      handle: '@yasiedudanquah', 
+      verified: true, 
+      time: '2h ago', 
+      color: '#0ea5e9,#6d28d9',
+      text: 'The convergence of <span class="nx-tx-hashtag">#AI</span> and <span class="nx-tx-hashtag">#CyberSecurity</span> is creating unprecedented opportunities. When autonomous defense agents can remediate zero-days within milliseconds, the threat landscape shifts entirely from reactive patching to predictive posture engineering. Thread 🧵👇', 
+      sparks: 284, 
+      echoes: 47, 
+      amplifies: 12 
+    },
+    { 
+      name: 'CyberWatch Global', 
+      handle: '@cyberwatchhq', 
+      verified: true, 
+      time: '4h ago', 
+      color: '#ef4444,#f59e0b',
+      text: '🚨 <strong>CRITICAL ADVISORY:</strong> Major zero-day vulnerability discovered in enterprise SSL-VPN appliances. Threat actors actively chaining auth bypass with remote code execution. Patch immediately or restrict external ingress. <span class="nx-tx-hashtag">#CVE2026</span> <span class="nx-tx-hashtag">#InfoSec</span>', 
+      sparks: 1823, 
+      echoes: 934, 
+      amplifies: 412 
+    },
+    { 
+      name: 'Sarah Mitchell', 
+      handle: '@sarahm_sec', 
+      verified: false, 
+      time: '6h ago', 
+      color: '#10b981,#0ea5e9',
+      text: 'Just completed my SANS SEC504 certification! The hands-on DFIR labs were incredible. Huge shoutout to the <span class="nx-tx-hashtag">#Elevate</span> study group for the practice exams! 🎓🛡️ <span class="nx-tx-hashtag">#GIAC</span> <span class="nx-tx-hashtag">#IncidentResponse</span>', 
+      sparks: 647, 
+      echoes: 89, 
+      amplifies: 23 
+    },
+    { 
+      name: 'Jordan Chen', 
+      handle: '@jordanc', 
+      verified: true, 
+      time: '9h ago', 
+      color: '#7c3aed,#ec4899',
+      text: 'Zero Trust is not a product you buy off the shelf — it is a disciplined architectural posture. Always verify, never trust, assume breach. <span class="nx-tx-hashtag">#ZeroTrust</span> <span class="nx-tx-hashtag">#Architecture</span>', 
+      sparks: 912, 
+      echoes: 154, 
+      amplifies: 88 
+    }
   ];
-  feed.innerHTML = posts.map(p => `
-    <div class="nx-post">
-      <div class="nx-post-avatar">${p.name[0]}</div>
-      <div class="nx-post-content">
-        <div class="nx-post-header">
-          <span class="nx-post-name">${p.name} ${p.verified ? '<span class="nx-verified">✦</span>' : ''}</span>
-          <span class="nx-post-handle">${p.handle} · ${p.time}</span>
-        </div>
-        <div class="nx-post-text">${p.text}</div>
-        <div class="nx-post-actions">
-          <button class="nx-post-action" onclick="showToast('💬 Reply')">💬 ${p.echoes}</button>
-          <button class="nx-post-action" onclick="showToast('🔁 Amplified!')">🔁 ${p.amplifies}</button>
-          <button class="nx-post-action" onclick="showToast('💎 Sparked!')">💎 ${p.sparks}</button>
-          <button class="nx-post-action" onclick="showToast('🔖 Bookmarked!')">🔖</button>
+
+  feed.innerHTML = posts.map((p, i) => `
+    <div class="nx-transmission" style="animation:fadeInUp .3s ease ${i * 0.05}s both">
+      <div class="nx-tx-header">
+        <div class="nx-tx-av" style="background:linear-gradient(135deg,${p.color})">${p.name[0]}</div>
+        <div class="nx-tx-meta">
+          <div class="nx-tx-name-row">
+            <span class="nx-tx-name">${p.name}</span>
+            ${p.verified ? '<span class="nx-verified">✦</span>' : ''}
+            <span class="nx-tx-handle">${p.handle}</span>
+            <span class="nx-tx-dot">·</span>
+            <span class="nx-tx-time">${p.time}</span>
+            <button class="nx-tx-more" onclick="showToast('Transmission options')">⋯</button>
+          </div>
+          <div class="nx-tx-text">${p.text}</div>
+          <div class="nx-tx-actions">
+            <button class="nx-tx-action reply-act" onclick="showToast('💬 Replying in thread...')">
+              <span class="nx-act-icon">💬</span> <span>${p.echoes}</span>
+            </button>
+            <button class="nx-tx-action amplify-act" onclick="toggleNexusAmplify(this, ${p.amplifies})">
+              <span class="nx-act-icon">🔁</span> <span class="amplify-count">${p.amplifies}</span>
+            </button>
+            <button class="nx-tx-action spark-act" onclick="toggleNexusSpark(this, ${p.sparks})">
+              <span class="nx-act-icon">💎</span> <span class="spark-count">${p.sparks}</span>
+            </button>
+            <button class="nx-tx-action bookmark-act" onclick="toggleNexusBookmark(this)">
+              <span class="nx-act-icon">🔖</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `).join('');
+}
+
+function publishNexusTransmission() {
+  const input = document.getElementById('nxQuickInput');
+  const text = input ? input.value.trim() : '';
+  if (!text) {
+    showToast('⚠️ Please write your transmission before broadcasting');
+    return;
+  }
+
+  const feed = document.getElementById('nxFeed');
+  if (feed) {
+    const newTx = document.createElement('div');
+    newTx.className = 'nx-transmission';
+    newTx.style.animation = 'fadeInUp .3s ease both';
+    newTx.innerHTML = `
+      <div class="nx-tx-header">
+        <div class="nx-tx-av" style="background:linear-gradient(135deg,#0ea5e9,#6d28d9)">Y</div>
+        <div class="nx-tx-meta">
+          <div class="nx-tx-name-row">
+            <span class="nx-tx-name">Yaw Asiedu</span>
+            <span class="nx-verified">✦</span>
+            <span class="nx-tx-handle">@yasiedudanquah</span>
+            <span class="nx-tx-dot">·</span>
+            <span class="nx-tx-time">Just now</span>
+            <button class="nx-tx-more" onclick="showToast('Transmission options')">⋯</button>
+          </div>
+          <div class="nx-tx-text">${text}</div>
+          <div class="nx-tx-actions">
+            <button class="nx-tx-action reply-act" onclick="showToast('💬 Replying...')">
+              <span class="nx-act-icon">💬</span> <span>0</span>
+            </button>
+            <button class="nx-tx-action amplify-act" onclick="toggleNexusAmplify(this, 0)">
+              <span class="nx-act-icon">🔁</span> <span class="amplify-count">0</span>
+            </button>
+            <button class="nx-tx-action spark-act" onclick="toggleNexusSpark(this, 1)">
+              <span class="nx-act-icon">💎</span> <span class="spark-count">1</span>
+            </button>
+            <button class="nx-tx-action bookmark-act" onclick="toggleNexusBookmark(this)">
+              <span class="nx-act-icon">🔖</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    feed.insertBefore(newTx, feed.firstChild);
+  }
+
+  if (input) input.value = '';
+  showToast('🌊 Transmitted live across the Nexus network!');
+}
+
+function toggleNexusSpark(btn, baseCount) {
+  const isSparked = btn.classList.toggle('sparked');
+  const count = btn.querySelector('.spark-count');
+  if (count) count.textContent = isSparked ? baseCount + 1 : baseCount;
+  showToast(isSparked ? '💎 Sparked transmission!' : 'Spark removed');
+}
+
+function toggleNexusAmplify(btn, baseCount) {
+  const isAmplified = btn.classList.toggle('amplified');
+  const count = btn.querySelector('.amplify-count');
+  if (count) count.textContent = isAmplified ? baseCount + 1 : baseCount;
+  showToast(isAmplified ? '🔁 Amplified to your followers!' : 'Amplification undone');
+}
+
+function toggleNexusBookmark(btn) {
+  const isBookmarked = btn.classList.toggle('bookmarked');
+  showToast(isBookmarked ? '🔖 Saved to your Bookmarks' : 'Removed from Bookmarks');
 }
 
 // ── Page Initializers (stubs for pages without dynamic content) ──
